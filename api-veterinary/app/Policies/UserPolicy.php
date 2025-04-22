@@ -28,6 +28,9 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
+        if ($user->can('publish articles')) {
+            return true;
+        }
         return false;
     }
 
