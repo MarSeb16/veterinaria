@@ -23,7 +23,31 @@ const router = createRouter({
     return { top: 0 }
   },
   extendRoutes: pages => [
-    ...[...pages].map(route => recursiveLayouts(route)),
+    ...[
+      {
+        path: '/',
+        name: 'index',
+        redirect: to => {
+          // TODO: Get type from backend
+          const userData = useCookie('userData')
+          const userRole = userData.value?.role
+          if (userRole === 'admin')
+            return { name: 'dashboards-crm' }
+          if (userRole === 'client')
+            return { name: 'access-control' }
+          
+          return { name: 'login', query: to.query }
+        },
+      },
+    ],
+    ...[...pages,...[
+      {
+        path: '/productos-lista',
+        name: 'productos',
+        component: () => import('@/pages/products.vue')
+
+      }
+    ]].map(route => recursiveLayouts(route)),
   ],
 })
 
