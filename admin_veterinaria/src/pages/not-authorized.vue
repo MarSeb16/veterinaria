@@ -18,41 +18,20 @@ definePage({
 
 <template>
   <div class="misc-wrapper">
-    <ErrorHeader
-      status-code="401"
-      title="You are not authorized! 🔐"
-      description="You don't have permission to access this page. Go Home!"
-      class="mb-10"
-    />
+    <ErrorHeader status-code="401" title="You are not authorized! 🔐"
+      description="You don't have permission to access this page. Go Home!" class="mb-10" />
 
     <!-- 👉 Image -->
     <div class="misc-avatar w-100 text-center">
-      <VImg
-        :src="pages401"
-        alt="Coming Soon"
-        :height="$vuetify.display.xs ? 400 : 500"
-        class="my-sm-5"
-      />
+      <VImg :src="pages401" alt="Coming Soon" :height="$vuetify.display.xs ? 400 : 500" class="my-sm-5" />
 
-      <VBtn
-        to="/"
-        class="mt-10"
-      >
+      <VBtn to="/" class="mt-10">
         Back to Home
       </VBtn>
 
-      <VImg
-        :src="miscThemeMask"
-        class="d-none d-md-block footer-coming-soon flip-in-rtl"
-        cover
-      />
+      <VImg :src="miscThemeMask" class="d-none d-md-block footer-coming-soon flip-in-rtl" cover />
 
-      <VImg
-        :src="miscObj"
-        class="d-none d-md-block footer-coming-soon-obj"
-        :max-width="212"
-        height="165"
-      />
+      <VImg :src="miscObj" class="d-none d-md-block footer-coming-soon-obj" :max-width="212" height="165" />
     </div>
   </div>
 </template>

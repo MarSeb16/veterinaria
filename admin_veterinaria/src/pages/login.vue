@@ -11,10 +11,15 @@ import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 
 const form = ref({
-  email: '',
-  password: '',
+  email: 'laravest@gmail.com',
+  password: '12345678',
   remember: false,
 })
+
+const error_exists = ref(null);
+const success_exists = ref(null);
+const route = useRoute()
+const router = useRouter()
 
 definePage({
   meta: {
@@ -25,19 +30,30 @@ definePage({
 
 const login = async () => {
   try {
+    error_exists.value = null;
+    success_exists.value = null;
     const resp = await $api('/auth/login', {
       method: 'POST',
       body: {
         email: form.value.email,
         password: form.value.password,
       },
-      onResponseError({response}) {
+      onResponseError({ response }) {
         console.log(response._data.error);
+        error_exists.value = response._data.error;
       }
     })
 
     console.log(resp)
 
+    localStorage.setItem('token', resp.access_token);
+    localStorage.setItem('user', JSON.stringify(resp.user));
+    success_exists.value = true;
+    setTimeout(async () => {
+      await nextTick(() => {
+        router.replace(route.query.to ? String(route.query.to) : '/')
+      })
+    }, 500);
   } catch (error) {
     console.log(error);
   }
@@ -93,17 +109,23 @@ const authV2LoginIllustration = useGenerateImageVariant(authV2LoginIllustrationL
                   :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
                   @click:append-inner="isPasswordVisible = !isPasswordVisible" />
 
+                <VAlert type="success" class="my-2" v-if="success_exists">
+                  Ingresaste correctamente las credenciales.
+                </VAlert>
+                <VAlert type="error" class="my-2" v-if="error_exists">
+                  Error presentado: <strong>{{ error_exists }}</strong> of error
+                </VAlert>
                 <!-- remember me checkbox -->
-                <div class="d-flex align-center justify-space-between flex-wrap my-6 gap-x-2">
+                <!-- <div class="d-flex align-center justify-space-between flex-wrap my-6 gap-x-2">
                   <VCheckbox v-model="form.remember" label="Remember me" />
 
                   <a class="text-primary" href="#">
                     Forgot Password?
                   </a>
-                </div>
+                </div> -->
 
                 <!-- login button -->
-                <VBtn block type="submit">
+                <VBtn block type="submit" class="my-2">
                   Login
                 </VBtn>
               </VCol>

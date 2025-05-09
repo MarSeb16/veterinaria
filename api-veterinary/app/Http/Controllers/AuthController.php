@@ -98,7 +98,14 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            "user" => [
+                "name" => auth('api')->user()->name,
+                "surname" => auth('api')->user()->surname,
+                "email" => auth('api')->user()->email,
+                "avatar" => auth('api')->user()->avatar ? env("APP_URL")."storage/".auth('api')->user()->avatar : null,
+                "role" => auth('api')->user()->role
+            ]
         ]);
     }
 }
