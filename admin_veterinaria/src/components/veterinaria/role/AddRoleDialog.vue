@@ -75,7 +75,7 @@ const store = async () => {
                 permissions.value = [];
                 emit('update:isDialogVisible', false)
                 emit('addRole', true);
-
+                document.location.reload();
             }, 500)
         }
     } catch (error) {

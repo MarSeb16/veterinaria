@@ -21,7 +21,7 @@
                     </VBtn>
                 </div>
             </VCardText>
-            <VDataTable :headers="headers" :items="data" :items-per-page="5" class="text-no-wrap">
+            <VDataTable :headers="headers" :items="data" :items-per-page="5" :loading="isLoading" class="text-no-wrap">
                 <template #item.id="{ item }">
                     <span class="text-h6">{{ item.id }}</span>
                 </template>
@@ -41,19 +41,22 @@
                     </div>
                 </template>
             </VDataTable>
-            <AddRoleDialog v-model:is-dialog-visible="isAddRoleDialogVisible" @addRole="list()" />
-            <EditRoleDialog v-if="role_selected" :rolSelected="role_selected" @editRole=" list()"
+            <!-- Fíjate aquí: le pasamos addRol al evento -->
+            <AddRoleDialog v-model:is-dialog-visible="isAddRoleDialogVisible" @addRole="addRol" />
+            <EditRoleDialog v-if="role_selected" :rolSelected="role_selected" @editRole="list"
                 v-model:is-dialog-visible="isEditRoleDialogVisible" />
             <DeleteRoleDialog v-if="role_selected_deleted" :rolSelected="role_selected_deleted"
-                v-model:is-dialog-visible="isDeleteRoleDialogVisible" @deleteRole="list()" />
+                v-model:is-dialog-visible="isDeleteRoleDialogVisible" @deleteRole="list" />
         </VCard>
     </div>
 </template>
 
 <script setup>
-// import data from '@/views/js/datatable'
 import { onMounted, ref, watch } from 'vue';
+
+// refs y estados
 const data = ref([]);
+const isLoading = ref(false);
 
 const headers = [
     { title: 'ID', key: 'id' },
@@ -61,7 +64,8 @@ const headers = [
     { title: 'Permisos', key: 'permissions_pluck' },
     { title: 'Fecha', key: 'created_at' },
     { title: 'Acciones', key: 'action' },
-]
+];
+
 const searchQuery = ref(null);
 const role_selected = ref(null);
 const role_selected_deleted = ref(null);
@@ -69,42 +73,78 @@ const isAddRoleDialogVisible = ref(false);
 const isEditRoleDialogVisible = ref(false);
 const isDeleteRoleDialogVisible = ref(false);
 
+// función para cargar lista de roles
 const list = async () => {
-    const resp = await $api('/role?search=' + (searchQuery.value ? searchQuery.value : ''), {
-        method: 'GET',
-        onResponseError({ response }) {
-            console.log(response)
-        },
-    })
-    console.log(resp);
-    data.value = resp.roles;
-}
+    isLoading.value = true;
+    try {
+        const resp = await $api('/role?search=' + (searchQuery.value || ''), {
+            method: 'GET',
+            onResponseError({ response }) {
+                console.error('Error en respuesta del servidor:', response);
+            },
+        });
+        console.log('Roles cargados:', resp);
+        data.value = resp.roles;
+    } catch (error) {
+        console.error('Error al obtener roles:', error);
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+// función para agregar rol
+const addRol = async (form) => {
+    isLoading.value = true;
+    try {
+        const resp = await $api('/role', {
+            method: 'POST',
+            body: form,
+            onResponseError({ response }) {
+                console.error('Error en respuesta del servidor:', response);
+            },
+        });
+        if (resp.message === 200) {
+            isAddRoleDialogVisible.value = false;
+            $toast.success('Rol registrado correctamente');
+            list(); // recarga la lista
+        } else {
+            $toast.error(resp.message_text || 'Error al registrar rol');
+        }
+    } catch (error) {
+        $toast.error('Error al registrar rol');
+    } finally {
+        isLoading.value = false;
+    }
+};
 
 const editItem = (item) => {
-    isEditRoleDialogVisible.value = true
-    role_selected.value = item
-
-}
+    isEditRoleDialogVisible.value = true;
+    role_selected.value = item;
+};
 
 const deleteItem = (item) => {
-    isDeleteRoleDialogVisible.value = true
-    role_selected_deleted.value = item
-}
+    isDeleteRoleDialogVisible.value = true;
+    role_selected_deleted.value = item;
+};
 
 onMounted(() => {
     list();
-})
-watch(isEditRoleDialogVisible, (event) => {
-    console.log(event);
-    if (event == false) {
+});
+
+watch(isEditRoleDialogVisible, (visible) => {
+    if (!visible) {
         role_selected.value = null;
     }
-})
+});
 
-watch(isDeleteRoleDialogVisible, (event) => {
-    console.log(event);
-    if (event == false) {
+watch(isDeleteRoleDialogVisible, (visible) => {
+    if (!visible) {
         role_selected_deleted.value = null;
     }
+});
+definePage({
+    meta: {
+        Permission: 'list_rol'
+    },
 })
 </script>

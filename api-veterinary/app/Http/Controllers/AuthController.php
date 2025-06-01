@@ -1,43 +1,44 @@
 <?php
 
 namespace App\Http\Controllers;
-  
+
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Validator;
-  
-  
+
+
 class AuthController extends Controller
 {
- 
+
     /**
      * Register a User.
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function register() {
+    public function register()
+    {
         Gate::authorize('create', User::class);
         $validator = Validator::make(request()->all(), [
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:8',
         ]);
-  
-        if($validator->fails()){
+
+        if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
-  
+
         $user = new User;
         $user->name = request()->name;
         $user->email = request()->email;
         $user->password = bcrypt(request()->password);
         $user->save();
-  
+
         return response()->json($user, 201);
     }
-  
-  
+
+
     /**
      * Get a JWT via given credentials.
      *
@@ -46,14 +47,14 @@ class AuthController extends Controller
     public function login()
     {
         $credentials = request(['email', 'password']);
-  
+
         if (! $token = auth('api')->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-  
+
         return $this->respondWithToken($token);
     }
-  
+
     /**
      * Get the authenticated User.
      *
@@ -63,7 +64,7 @@ class AuthController extends Controller
     {
         return response()->json(auth('api')->user());
     }
-  
+
     /**
      * Log the user out (Invalidate the token).
      *
@@ -72,10 +73,10 @@ class AuthController extends Controller
     public function logout()
     {
         auth('api')->logout();
-  
+
         return response()->json(['message' => 'Successfully logged out']);
     }
-  
+
     /**
      * Refresh a token.
      *
@@ -85,7 +86,7 @@ class AuthController extends Controller
     {
         return $this->respondWithToken(auth('api')->refresh());
     }
-  
+
     /**
      * Get the token array structure.
      *
@@ -95,16 +96,21 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token)
     {
+        $permissions = auth('api')->user()->getAllPermissions()->map(function ($permission) {
+            return $permission->name;
+        });
+
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60,
-            "user" => [
-                "name" => auth('api')->user()->name,
-                "surname" => auth('api')->user()->surname,
-                "email" => auth('api')->user()->email,
-                "avatar" => auth('api')->user()->avatar ? env("APP_URL")."storage/".auth('api')->user()->avatar : null,
-                "role" => auth('api')->user()->role
+            'user' => [
+                'name' => auth('api')->user()->name,
+                'surname' => auth('api')->user()->surname,
+                'email' => auth('api')->user()->email,
+                'avatar' => auth('api')->user()->avatar ? env("APP_URL") . "storage/" . auth('api')->user()->avatar : null,
+                'role' => auth('api')->user()->role,
+                'permissions' => $permissions,
             ]
         ]);
     }

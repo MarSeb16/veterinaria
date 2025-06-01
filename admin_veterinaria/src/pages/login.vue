@@ -51,9 +51,10 @@ const login = async () => {
     success_exists.value = true;
     setTimeout(async () => {
       await nextTick(() => {
-        router.replace(route.query.to ? String(route.query.to) : '/')
+        router.replace('/dashboard');
       })
     }, 500);
+
   } catch (error) {
     console.log(error);
   }

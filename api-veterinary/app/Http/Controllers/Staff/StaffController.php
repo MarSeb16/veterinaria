@@ -7,6 +7,7 @@ use App\Http\Resources\User\UserCollection;
 use App\Http\Resources\User\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
 
@@ -18,9 +19,15 @@ class StaffController extends Controller
     public function index(Request $request)
     {
         $search = $request->get("search");
-        $users = User::where("name", "ilike", "%" . $search . "%")->orderBy("id", "asc")->get();
+        $users = User::where(DB::raw("users.name || ' ' || COALESCE(users.surname,'')|| ' ' || users.email"), "ilike", "%" . $search . "%")->orderBy("id", "asc")->get();
         return response()->json([
             "users" => UserCollection::make($users),
+            "roles" => Role::where("name", "not ilike", "%veterinario%")->get()->map(function ($role) {
+                return [
+                    "id" => $role->id,
+                    "name" => $role->name
+                ];
+            })
         ]);
     }
 
@@ -45,6 +52,9 @@ class StaffController extends Controller
         if ($request->password) {
             $request->request->add(["password" => bcrypt($request->password)]);
         }
+        // if ($request->birthday) {
+        //     $request->request->add(["birthday" => $request->birthday . "00:00:00"]);
+        // }
 
         $user = User::create($request->all());
         $role = Role::findOrFail($request->role_id);
@@ -113,8 +123,5 @@ class StaffController extends Controller
             Storage::delete($user->avatar);
         }
         $user->delete();
-        return response()->json([
-            "message" => 200,
-        ]);
     }
 }

@@ -78,6 +78,7 @@ const store = async () => {
             setTimeout(() => {
                 success.value = null
                 emit('update:isDialogVisible', false)
+                document.location.reload();
             }, 1000)
         }
     } catch (error) {
@@ -140,8 +141,8 @@ onMounted(() => {
                                 <ul>
                                     <li v-for="(permiso, index2) in item.permisos" :key="index2"
                                         style="list-style: none">
-                                        <VCheckbox v-model="permissions" :label="permiso.name" :value="permiso.permiso"
-                                            @click="AddPermission(permiso.permiso)" />
+                                        <VCheckbox v-model="permissions" :label="permiso.name"
+                                            :value="permiso.permiso" />
                                     </li>
                                 </ul>
                             </td>
