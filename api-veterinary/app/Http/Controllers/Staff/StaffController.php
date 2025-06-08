@@ -19,13 +19,17 @@ class StaffController extends Controller
     public function index(Request $request)
     {
         $search = $request->get("search");
-        $users = User::where(DB::raw("users.name || ' ' || COALESCE(users.surname,'')|| ' ' || users.email"), "ilike", "%" . $search . "%")->orderBy("id", "asc")->get();
+        $users = User::where(DB::raw("users.name || ' ' || COALESCE(users.surname,'')|| ' ' || users.email"), "ilike", "%" . $search . "%")
+            ->whereHas("roles", function ($query) {
+                $query->where("name", "not ilike", "%veterinario%");
+            })
+            ->orderBy("id", "asc")->get();
         return response()->json([
             "users" => UserCollection::make($users),
             "roles" => Role::where("name", "not ilike", "%veterinario%")->get()->map(function ($role) {
                 return [
                     "id" => $role->id,
-                    "name" => $role->name
+                    "name" => $role->name  
                 ];
             })
         ]);

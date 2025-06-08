@@ -1,10 +1,10 @@
 <template>
     <div>
-        <VCard title="Staffs">
+        <VCard title="Veterinarios">
             <VCardText class="d-flex flex-wrap gap-4">
                 <div class="d-flex align-center">
                     <!-- 👉 Search  -->
-                    <VTextField v-model="searchQuery" placeholder="Buscar Staff" style="inline-size: 300px;"
+                    <VTextField v-model="searchQuery" placeholder="Buscar Veterinario" style="inline-size: 300px;"
                         density="compact" class="me-3" @keyup.enter="list" />
                 </div>
 
@@ -15,9 +15,8 @@
                     <!-- <VBtn variant="outlined" color="secondary" prepend-icon="ri-upload-2-line">
                         Export
                     </VBtn> -->
-                    <VBtn color="primary" prepend-icon="ri-add-line"
-                        @click="isAddStaffDialogVisible = !isAddStaffDialogVisible">
-                        Agregar Staff
+                    <VBtn color="primary" prepend-icon="ri-add-line" @click="router.push({ name: 'veterinarie-add' })">
+                        Agregar Veterinario
                     </VBtn>
                 </div>
             </VCardText>
@@ -33,6 +32,7 @@
                             <VImg v-if="item.imagen" :src="item.imagen" />
                             <span v-else class="text-sm">{{ avatarText(item.full_name) }}</span>
                         </VAvatar>
+
                         <!-- <div class="d-flex flex-column ms-3">
               <span class="d-block font-weight-medium text-high-emphasis text-truncate">{{ item.full_Name }}</span>
               <small>{{ item.post }}</small>
@@ -43,7 +43,7 @@
                     <div class="d-flex align-center">
                         <div class="d-flex flex-column ms-3">
                             <span class="d-block font-weight-medium text-high-emphasis text-truncate">{{ item.n_document
-                                }}</span>
+                            }}</span>
                             <small>{{ item.type_document }}</small>
                         </div>
                     </div>
@@ -59,11 +59,8 @@
                     </div>
                 </template>
             </VDataTable>
-            <AddStaffDialog v-if="roles.length > 0" v-model:is-dialog-visible="isAddStaffDialogVisible" :roles="roles"
-                @addUser="addUser" />
-            <EditStaffDialog v-if="user_selected" :userSelected="user_selected" :roles="roles" @editUser="editUser"
-                v-model:is-dialog-visible="isEditStaffDialogVisible" />
-            <DeleteStaffDialog v-if="user_selected_deleted" :userSelected="user_selected_deleted"
+
+            <DeleteVeterinaryDialog v-if="user_selected_deleted" :userSelected="user_selected_deleted"
                 v-model:is-dialog-visible="isDeleteStaffDialogVisible" @deleteUser="deleteUser" />
         </VCard>
     </div>
@@ -73,7 +70,6 @@
 // import data from '@/views/js/datatable'
 import { onMounted, ref, watch } from 'vue';
 const data = ref([]);
-const roles = ref([]);
 const headers = [
     { title: 'ID', key: 'id' },
     { title: 'Avatar', key: 'imagen' },
@@ -105,20 +101,15 @@ const user_selected_deleted = ref(null);
 const isAddStaffDialogVisible = ref(false);
 const isEditStaffDialogVisible = ref(false);
 const isDeleteStaffDialogVisible = ref(false);
-
+const router = useRouter();
 const list = async () => {
-    const resp = await $api('/staffs?search=' + (searchQuery.value ? searchQuery.value : ''), {
+    const resp = await $api('/veterinaries?search=' + (searchQuery.value ? searchQuery.value : ''), {
         method: 'GET',
         onResponseError({ response }) {
             console.log(response)
         },
     })
-    data.value = resp.users.data;
-    roles.value = resp.roles;
-}
-
-const addUser = (newUser) => {
-    data.value.unshift(newUser);
+    data.value = resp.veterinaries.data;
 }
 
 const deleteUser = async (User) => {
@@ -134,12 +125,10 @@ const editUser = async (editUser) => {
         data.value[INDEX] = editUser;
     }
 }
+
 const editItem = (item) => {
-    isEditStaffDialogVisible.value = true
-    user_selected.value = item
-
+    router.push({ name: 'veterinarie-edit-id', params: { id: item.id } });
 }
-
 const deleteItem = (item) => {
     isDeleteStaffDialogVisible.value = true
     user_selected_deleted.value = item
@@ -151,10 +140,9 @@ onMounted(() => {
 watch(isEditStaffDialogVisible, (event) => {
     console.log(event);
     if (event == false) {
-        user_selected.value = null;
+        user_selected_deleted.value = null;
     }
 })
-
 watch(isDeleteStaffDialogVisible, (event) => {
     console.log(event);
     if (event == false) {
@@ -163,7 +151,7 @@ watch(isDeleteStaffDialogVisible, (event) => {
 })
 definePage({
     meta: {
-        Permission: 'list_staff'
+        Permission: 'list_veterinary'
     },
 })
 </script>

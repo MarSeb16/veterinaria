@@ -226,8 +226,8 @@ onMounted(() => {
                                 <VFileInput dense outlined label="Selecciona archivo" @change="loadFile($event)" />
                             </vCol>
                             <vCol cols="6">
-                                <VSelect :items="roles" v-model="form.role_id" label="Rol"
-                                    item-title="name" item-value="id" placeholder="Selecciopna el rol" eager />
+                                <VSelect :items="roles" v-model="form.role_id" label="Rol" item-title="name"
+                                    item-value="id" placeholder="Selecciopna el rol" eager />
                             </vCol>
                         </vRow>
                     </vCol>

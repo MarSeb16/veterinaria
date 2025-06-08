@@ -28,6 +28,9 @@ declare module 'vue-router/auto-routes' {
     'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,
     'staff': RouteRecordInfo<'staff', '/staff', Record<never, never>, Record<never, never>>,
     'staffs': RouteRecordInfo<'staffs', '/staffs', Record<never, never>, Record<never, never>>,
+    'veterinarie-add': RouteRecordInfo<'veterinarie-add', '/veterinarie/add', Record<never, never>, Record<never, never>>,
+    'veterinarie-edit-id': RouteRecordInfo<'veterinarie-edit-id', '/veterinarie/edit/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    'veterinarie-list': RouteRecordInfo<'veterinarie-list', '/veterinarie/list', Record<never, never>, Record<never, never>>,
     'veterinaries': RouteRecordInfo<'veterinaries', '/veterinaries', Record<never, never>, Record<never, never>>,
   }
 }
