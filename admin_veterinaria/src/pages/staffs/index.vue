@@ -27,10 +27,10 @@
                 </template>
                 <template #item.imagen="{ item }">
                     <div class="d-flex align-center">
-                        <VAvatar size="32" :color="item.imagen ? '' : 'primary'"
-                            :class="item.imagen ? '' : 'v-avatar-light-bg primary--text'"
-                            :variant="!item.imagen ? 'tonal' : undefined">
-                            <VImg v-if="item.imagen" :src="item.imagen" />
+                        <VAvatar size="32" :color="item.avatar ? '' : 'primary'"
+                            :class="item.avatar ? '' : 'v-avatar-light-bg primary--text'"
+                            :variant="item.avatar ? 'tonal' : undefined">
+                            <VImg v-if="item.avatar" :src="item.avatar" />
                             <span v-else class="text-sm">{{ avatarText(item.full_name) }}</span>
                         </VAvatar>
                         <!-- <div class="d-flex flex-column ms-3">
@@ -43,7 +43,7 @@
                     <div class="d-flex align-center">
                         <div class="d-flex flex-column ms-3">
                             <span class="d-block font-weight-medium text-high-emphasis text-truncate">{{ item.n_document
-                                }}</span>
+                            }}</span>
                             <small>{{ item.type_document }}</small>
                         </div>
                     </div>
@@ -96,6 +96,10 @@ const avatarText = value => {
     const lastNameInitial = nameArray[2] ? nameArray[2].charAt(0).toUpperCase() : nameArray[1].charAt(0).toUpperCase();
 
     return firstNameInitial + lastNameInitial;
+    // if (!value)
+    //     return ''
+    // const nameArray = value.split(' ')
+    // return nameArray.map(word => word.charAt(0).toUpperCase()).join('')
 }
 
 

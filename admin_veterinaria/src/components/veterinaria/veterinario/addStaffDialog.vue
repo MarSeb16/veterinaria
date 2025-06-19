@@ -99,10 +99,10 @@ const store = async () => {
         }
     }
 
-    if (!FILE_AVATAR.value) {
-        warning.value = 'Se debe seleccionar un avatar para el usuario'
-        return
-    }
+    // if (!FILE_AVATAR.value) {
+    //     warning.value = 'Se debe seleccionar un avatar para el usuario'
+    //     return
+    // }
 
     const formData = new FormData()
     Object.keys(form.value).forEach(key => {
@@ -223,7 +223,7 @@ onMounted(() => {
                     <vCol cols="12">
                         <vRow>
                             <vCol cols="6">
-                                <VFileInput dense outlined label="Selecciona archivo" @change="loadFile($event)" />
+                                <VFileInput label="Selecciona archivo" @change="loadFile($event)" />
                             </vCol>
                             <vCol cols="6">
                                 <VSelect :items="roles" v-model="form.role_id" label="Rol" item-title="name"

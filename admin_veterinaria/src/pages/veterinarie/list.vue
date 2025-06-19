@@ -26,13 +26,12 @@
                 </template>
                 <template #item.imagen="{ item }">
                     <div class="d-flex align-center">
-                        <VAvatar size="32" :color="item.imagen ? '' : 'primary'"
-                            :class="item.imagen ? '' : 'v-avatar-light-bg primary--text'"
-                            :variant="!item.imagen ? 'tonal' : undefined">
-                            <VImg v-if="item.imagen" :src="item.imagen" />
+                        <VAvatar size="32" :color="item.avatar ? '' : 'primary'"
+                            :class="item.avatar ? '' : 'v-avatar-light-bg primary--text'"
+                            :variant="item.avatar ? 'tonal' : undefined">
+                            <VImg v-if="item.avatar" :src="item.avatar" />
                             <span v-else class="text-sm">{{ avatarText(item.full_name) }}</span>
                         </VAvatar>
-
                         <!-- <div class="d-flex flex-column ms-3">
               <span class="d-block font-weight-medium text-high-emphasis text-truncate">{{ item.full_Name }}</span>
               <small>{{ item.post }}</small>

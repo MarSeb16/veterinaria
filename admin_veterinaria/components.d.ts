@@ -38,6 +38,7 @@ declare module 'vue' {
     CustomRadios: typeof import('./src/@core/components/app-form-elements/CustomRadios.vue')['default']
     CustomRadiosWithIcon: typeof import('./src/@core/components/app-form-elements/CustomRadiosWithIcon.vue')['default']
     CustomRadiosWithImage: typeof import('./src/@core/components/app-form-elements/CustomRadiosWithImage.vue')['default']
+    DeletePetDialog: typeof import('./src/components/veterinaria/pet/DeletePetDialog.vue')['default']
     DeleteRoleDialog: typeof import('./src/components/veterinaria/role/DeleteRoleDialog.vue')['default']
     DeleteStaffDialog: typeof import('./src/components/veterinaria/veterinario/deleteStaffDialog.vue')['default']
     DeleteVeterinaryDialog: typeof import('./src/components/veterinaria/veterinary/deleteVeterinaryDialog.vue')['default']

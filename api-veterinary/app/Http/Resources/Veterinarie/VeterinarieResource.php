@@ -44,7 +44,7 @@ class VeterinarieResource extends JsonResource
                 "name" => $this->resource->role?->name,
             ],
             "role_name" => $this->resource->role?->name,
-            'avatar' => $this->resource->avatar ? env("APP_URL") . "storage/" . $this->resource->avatar : null,
+            'avatar' => $this->resource->avatar ? asset('storage/' . $this->resource->avatar) : null,
             'type_document' => $this->resource->type_document,
             'n_document' => $this->resource->n_document,
             'phone' => $this->resource->phone,
