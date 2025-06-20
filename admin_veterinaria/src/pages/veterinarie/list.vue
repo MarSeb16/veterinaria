@@ -11,10 +11,6 @@
                 <VSpacer />
 
                 <div class="d-flex gap-x-4 align-center">
-                    <!-- 👉 Export button -->
-                    <!-- <VBtn variant="outlined" color="secondary" prepend-icon="ri-upload-2-line">
-                        Export
-                    </VBtn> -->
                     <VBtn color="primary" prepend-icon="ri-add-line" @click="router.push({ name: 'veterinarie-add' })">
                         Agregar Veterinario
                     </VBtn>
@@ -42,7 +38,7 @@
                     <div class="d-flex align-center">
                         <div class="d-flex flex-column ms-3">
                             <span class="d-block font-weight-medium text-high-emphasis text-truncate">{{ item.n_document
-                            }}</span>
+                                }}</span>
                             <small>{{ item.type_document }}</small>
                         </div>
                     </div>

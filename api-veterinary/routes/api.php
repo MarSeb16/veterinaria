@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Appointment\AppointmentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Pets\PetController;
@@ -32,4 +33,8 @@ Route::group([
 
     Route::post("pets/{id}", [PetController::class, "update"]);
     Route::resource("pets", PetController::class);
+
+    Route::get("appointments/search-pets/{search}", [AppointmentController::class, "searchPets"]);
+    Route::post("appointments/filter-availability", [AppointmentController::class, "filter"]);
+    Route::resource("appointments", AppointmentController::class);
 });

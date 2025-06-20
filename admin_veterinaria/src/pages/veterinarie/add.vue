@@ -337,8 +337,8 @@ definePage({
             </VCardText>
             <VCardText class="pa-4">
                 <div class="text-h6 font-weight-medium mb-4">
-                    {{ schedule_hours_veterinarie }}
-                    {{ selected_segment_time }}
+                    <!-- {{ schedule_hours_veterinarie }}
+                    {{ selected_segment_time }} -->
 
                 </div>
 
