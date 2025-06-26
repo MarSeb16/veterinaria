@@ -43,19 +43,19 @@
                     <div class="d-flex align-center">
                         <div class="d-flex flex-column ms-3">
                             <span class="d-block font-weight-medium text-high-emphasis text-truncate">{{ item.n_document
-                            }}</span>
+                                }}</span>
                             <small>{{ item.type_document }}</small>
                         </div>
                     </div>
                 </template>
                 <template #item.action="{ item }">
                     <div class="d-flex gap-1">
-                        <IconBtn size="small" @click="editItem(item)">
+                        <VBtn icon variant="text" size="small" @click="editItem(item)">
                             <VIcon icon="ri-pencil-line" />
-                        </IconBtn>
-                        <IconBtn size="small" @click="deleteItem(item)">
+                        </VBtn>
+                        <VBtn icon variant="text" size="small" @click="deleteItem(item)">
                             <VIcon icon="ri-delete-bin-line" />
-                        </IconBtn>
+                        </VBtn>
                     </div>
                 </template>
             </VDataTable>

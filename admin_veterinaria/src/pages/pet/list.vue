@@ -135,12 +135,12 @@ definePage({
                             <td>{{ item.color }}</td>
                             <td>
                                 <div class="d-flex gap-1">
-                                    <IconBtn size="small" @click="editItem(item)">
+                                    <VBtn icon variant="text" size="small" @click="editItem(item)">
                                         <VIcon icon="ri-pencil-line" />
-                                    </IconBtn>
-                                    <IconBtn size="small" @click="deleteItem(item)">
+                                    </VBtn>
+                                    <VBtn icon variant="text" size="small" @click="deleteItem(item)">
                                         <VIcon icon="ri-delete-bin-line" />
-                                    </IconBtn>
+                                    </VBtn>
                                 </div>
                             </td>
                         </tr>

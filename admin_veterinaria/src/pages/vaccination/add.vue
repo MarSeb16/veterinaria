@@ -8,12 +8,16 @@ const warning = ref(null)
 const veterinarie_time_availability = ref([])
 const segment_time_veterinaries = ref([])
 const selected_segment_times = ref([])
+const segment_time_hour_veterinaries = ref([]);
 const loading = ref(false)
 const search = ref()
 const select_pet = ref(null)
 const items = ref([])
 const veterinarie_id = ref(null)
 const reason = ref(null)
+const vaccine_name = ref(null);
+const nex_due_date = ref(null);
+const outside = ref('0');
 
 const datePickerConfig = {
     locale: Spanish,
@@ -25,7 +29,7 @@ const datePickerConfig = {
 }
 
 const form = ref({
-    date_appointment: null,
+    vaccination_date: null,
     time: null,
     amount: 0,
     method_payment: 'EFECTIVO',
@@ -36,7 +40,7 @@ const method_payments = ref(['EFECTIVO', 'PAGO POR QR', 'YAPE'])
 
 const canSubmit = computed(() => {
     return (
-        form.value.date_appointment &&
+        form.value.vaccination_date &&
         form.value.time &&
         reason.value &&
         select_pet.value &&
@@ -47,13 +51,13 @@ const canSubmit = computed(() => {
 })
 
 const filter = async () => {
-    if (!form.value.date_appointment) {
+    if (!form.value.vaccination_date) {
         warning.value = 'Es necesario ingresar una fecha'
         return
     }
     try {
         const data = {
-            date_appointment: form.value.date_appointment,
+            vaccination_date: form.value.vaccination_date,
             hour: form.value.time
         }
         const resp = await $api('/appointments/filter-availability', {
@@ -71,7 +75,7 @@ const filter = async () => {
 }
 
 const reset = () => {
-    form.value.date_appointment = null
+    form.value.vaccination_date = null
     form.value.time = null
     veterinarie_time_availability.value = []
     segment_time_veterinaries.value = []
@@ -80,8 +84,13 @@ const reset = () => {
 
 const selectedSegmentHour = (veterinarie_time, segment_time_group) => {
     veterinarie_time.segment_times = segment_time_group.segment_times
-    selected_segment_times.value = []
-    segment_time_veterinaries.value = []
+    // selected_segment_times.value = []
+    // segment_time_veterinaries.value = []
+    veterinarie_id.value = veterinarie_time.id
+    selected_segment_times.value = selected_segment_times.value.filter(item => item.veterinarie_id === veterinarie_time.id)
+    segment_time_veterinaries.value = segment_time_veterinaries.value.filter(item => item.indexOf(`${veterinarie_time.id}-`) !== -1)
+    segment_time_hour_veterinaries.value = segment_time_hour_veterinaries.value.filter(item => item.indexOf(`${veterinarie_time.id}-`) !== -1)
+
 }
 
 const addSelectedSegmentTime = (veterinarie_time, segment_time) => {
@@ -101,8 +110,30 @@ const addSelectedSegmentTime = (veterinarie_time, segment_time) => {
     segment_time_veterinaries.value = segment_time_veterinaries.value.filter(item => item.indexOf(`${veterinarie_time.id}-`) !== -1)
 }
 
+const addSelectedSegmentTimeHour = (veterinarie_time, segment_time_group) => {
+    segment_time_group.segment_times.forEach(segment_time => {
+        const index = selected_segment_times.value.findIndex(item =>
+            item.veterinarie_id === veterinarie_time.id && item.segment_time_id === segment_time.veterinarie_schedule_hour_id
+        )
+        if (index !== -1) {
+            selected_segment_times.value.splice(index, 1)
+            segment_time_veterinaries.value.splice(index, 1)
+        } else {
+            selected_segment_times.value.push({
+                veterinarie_id: veterinarie_time.id,
+                segment_time_id: segment_time.veterinarie_schedule_hour_id
+            })
+            segment_time_veterinaries.value.push(veterinarie_time.id + '-' + segment_time.veterinarie_schedule_hour_id)
+        }
+    })
+
+    veterinarie_id.value = veterinarie_time.id
+    selected_segment_times.value = selected_segment_times.value.filter(item => item.veterinarie_id === veterinarie_time.id)
+    segment_time_veterinaries.value = segment_time_veterinaries.value.filter(item => item.indexOf(`${veterinarie_time.id}-`) !== -1)
+    segment_time_hour_veterinaries.value = segment_time_hour_veterinaries.value.filter(item => item.indexOf(`${veterinarie_time.id}-`) !== -1)
+}
 const fieldsClean = () => {
-    form.value.date_appointment = null
+    form.value.vaccination_date = null
     form.value.time = null
     form.value.amount = 0
     form.value.method_payment = 'EFECTIVO'
@@ -137,7 +168,7 @@ const store = async () => {
         const data = {
             veterinarie_id: veterinarie_id.value,
             pet_id: select_pet.value.id,
-            date_appointment: form.value.date_appointment,
+            vaccination_date: form.value.vaccination_date,
             reason: reason.value,
             amount: form.value.amount,
             state_pay: STATE_PAY,
@@ -145,7 +176,7 @@ const store = async () => {
             adelanto: form.value.amount_add,
             selected_segment_times: selected_segment_times.value
         }
-        const resp = await $api('/appointments', {
+        const resp = await $api('/vaccinations', {
             method: 'POST',
             body: data,
             onResponseError({ response }) {
@@ -153,7 +184,7 @@ const store = async () => {
             }
         })
 
-        success.value = 'La cita médica se ha programado correctamente'
+        success.value = 'La vacuna se ha programado correctamente'
 
         setTimeout(() => {
             success.value = null
@@ -187,7 +218,7 @@ watch(search, query => {
 
 definePage({
     meta: {
-        Permission: 'register_appointment'
+        Permission: 'register_vaccination'
     }
 })
 </script>
@@ -196,22 +227,23 @@ definePage({
         <VCard class="pa-3 pa-sm-8 rounded-lg mb-6" elevation="4">
             <VCardText>
                 <div class="text-center">
-                    <h4 class="section-title">Agregar Cita Médica</h4>
-                    <p class="section-subtitle">Completa los datos requeridos</p>
+                    <h4 class="section-title">Vacunaciones</h4>
+                    <p class="section-subtitle">Completa los datos correspondiente para la vacuna </p>
                 </div>
             </VCardText>
             <v-divider class="mb-4" />
 
             <v-row dense>
                 <v-col cols="12" md="4">
-                    <AppDateTimePicker v-model="form.date_appointment" label="Fecha de la cita" dense outlined :config="{
-                        ...datePickerConfig,
-                        minDate: 'today',
-                        disable: [date => date.getDay() === 0 || date.getDay() === 6]
-                    }" />
+                    <AppDateTimePicker v-model="form.vaccination_date" label="Fecha de la vacuna" dense outlined
+                        :config="{
+                            ...datePickerConfig,
+                            minDate: 'today',
+                            disable: [date => date.getDay() === 0 || date.getDay() === 6]
+                        }" />
                 </v-col>
                 <v-col cols="12" md="4">
-                    <AppDateTimePicker v-model="form.time" label="Hora de la cita"
+                    <AppDateTimePicker v-model="form.time" label="Hora de la vacuna"
                         :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i' }" />
                 </v-col>
                 <div class="d-flex align-center gap-x-2 mt-2">
@@ -252,13 +284,17 @@ definePage({
                                     <td>{{ veterinarie_time.full_name }}</td>
                                     <td>
                                         <ul>
-                                            <li v-for="(group, i) in veterinarie_time.segment_time_groups" :key="i"
-                                                class="list-none">
+                                            <li v-for="(segment_time_group, i) in veterinarie_time.segment_time_groups"
+                                                :key="i" style="list-style: none; display: flex; align-items: center">
+                                                <VCheckbox v-model="segment_time_hour_veterinaries"
+                                                    @click="addSelectedSegmentTimeHour(veterinarie_time, segment_time_group)"
+                                                    :value="veterinarie_time.id + '-' + segment_time_group.hour_format" />
                                                 <VBtn color="success" icon
-                                                    @click="selectedSegmentHour(veterinarie_time, group)">
+                                                    @click="selectedSegmentHour(veterinarie_time, segment_time_group)">
                                                     <i class="ri-file-add-line" />
                                                 </VBtn>
-                                                {{ group.hour_format }} ({{ group.segment_times.length }})
+                                                {{ segment_time_group.hour_format }} ({{
+                                                    segment_time_group.segment_times.length }})
                                             </li>
                                         </ul>
                                     </td>
@@ -278,8 +314,31 @@ definePage({
                             </template>
                         </tbody>
                     </VTable>
-                    <VTextarea v-model="reason" label="Razón de la cita" placeholder="Describe el motivo de atención"
-                        class="mt-4" />
+                    <v-row dense>
+                        <v-col cols="12" md="5">
+                            <VTextarea v-model="reason" label="Razón de la vacuna"
+                                placeholder="Describe el motivo de poner la vacuna" class="mt-4" />
+                        </v-col>
+                        <v-col cols="12" md="5">
+                            <VTextarea v-model="vaccine_name" label="Vacunas"
+                                placeholder="Describe el motivo de la vacuna" class="mt-4" />
+                        </v-col>
+                        <v-col cols="12" md="5">
+                            <AppDateTimePicker v-model="nex_due_date" label="Fecha de la proxima vacuna" dense outlined
+                                :config="{
+                                    ...datePickerConfig,
+                                    minDate: 'today',
+                                    disable: [date => date.getDay() === 0 || date.getDay() === 6]
+                                }" />
+                        </v-col>
+                        <v-col cols="12" md="5">
+                            <VRadioGroup v-model="outside" inline>
+                                <VRadio label="Dentro de la veterinaria" value="0" />
+                                <VRadio label="Fuera de la veterinaria" value="1" />
+                            </VRadioGroup>
+                        </v-col>
+                    </v-row>
+
                 </v-col>
             </v-row>
         </VCard>
@@ -314,7 +373,7 @@ definePage({
             <h6 class="section-title">Pagos</h6>
             <v-row dense>
                 <v-col cols="12" md="4">
-                    <VTextField label="Costo de la cita" type="number" placeholder="Ej.: 100 Bs."
+                    <VTextField label="Costo de la vacuna" type="number" placeholder="Ej.: 100 Bs."
                         v-model="form.amount" />
                 </v-col>
                 <v-col cols="12" md="4">

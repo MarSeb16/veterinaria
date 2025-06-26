@@ -1,21 +1,21 @@
 <?php
 
-namespace App\Models\Appointment;
+namespace App\Models\Vaccination;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class AppointmentPayment extends Model
+class VaccionationPayment extends Model
 {
     use HasFactory, SoftDeletes;
     protected $fillable = [
-        "appointment_id",
+        "vaccination_id",
         "method_payment",
         "amount"
     ];
-    public function appointment()
+    public function vaccination()
     {
-        return $this->belongsTo(Appointment::class, "appointment_id");
+        return $this->belongsTo(Vaccionation::class, "vaccination_id");
     }
 }

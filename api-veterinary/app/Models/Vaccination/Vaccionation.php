@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Appointment;
+namespace App\Models\Vaccination;
 
 use App\Models\MedicalRecord;
 use App\Models\Pets\Pet;
@@ -10,14 +10,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Appointment extends Model
+class Vaccionation extends Model
 {
     use HasFactory, SoftDeletes;
     protected $fillable = [
         "veterinarie_id",
         "pet_id",
         "day",
-        "date_appointment",
+        "vaccination_date",
+        "vaccine_name",
+        "nex_due_date",
+        "outside",
         "reason",
         "reprogramar",
         "state",
@@ -39,21 +42,21 @@ class Appointment extends Model
     }
     public function payments()
     {
-        return $this->hasMany(AppointmentPayment::class);
+        return $this->hasMany(VaccionationPayment::class);
     }
     public function medical_record()
     {
-        return $this->hasOne(MedicalRecord::class, "appointment_id");
+        return $this->hasOne(MedicalRecord::class, "vaccination_id");
     }
     public function schedules()
     {
-        return $this->hasMany(AppointmentSchedule::class);
+        return $this->hasMany(VaccionationSchedule::class);
     }
     public function scopeFilterMultiple($query, $type_date, $start_date, $end_date, $state_pay, $specie, $state, $search_pets)
     {
         if ($start_date && $end_date) {
             if ($type_date == 1) {
-                $query->whereBetween("date_appoinment", [Carbon::parse($start_date)->format("Y-m-d") . " 00:00:00", Carbon::parse($end_date)->format("Y-m-d") . " 23:59:59"]);
+                $query->whereBetween("vaccination_date", [Carbon::parse($start_date)->format("Y-m-d") . " 00:00:00", Carbon::parse($end_date)->format("Y-m-d") . " 23:59:59"]);
             } else {
                 $query->whereBetween("created_at", [Carbon::parse($start_date)->format("Y-m-d") . " 00:00:00", Carbon::parse($end_date)->format("Y-m-d") . " 23:59:59"]);
             }
