@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class VaccionationPayment extends Model
+class VaccinationPayment extends Model
 {
     use HasFactory, SoftDeletes;
     protected $fillable = [
@@ -16,6 +16,6 @@ class VaccionationPayment extends Model
     ];
     public function vaccination()
     {
-        return $this->belongsTo(Vaccionation::class, "vaccination_id");
+        return $this->belongsTo(Vaccination::class, "vaccination_id");
     }
 }

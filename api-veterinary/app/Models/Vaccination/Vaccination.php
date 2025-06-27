@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Vaccionation extends Model
+class Vaccination extends Model
 {
     use HasFactory, SoftDeletes;
     protected $fillable = [
@@ -18,7 +18,7 @@ class Vaccionation extends Model
         "pet_id",
         "day",
         "vaccination_date",
-        "vaccine_name",
+        "vaccine_names",
         "nex_due_date",
         "outside",
         "reason",
@@ -42,7 +42,7 @@ class Vaccionation extends Model
     }
     public function payments()
     {
-        return $this->hasMany(VaccionationPayment::class);
+        return $this->hasMany(VaccinationPayment::class);
     }
     public function medical_record()
     {
@@ -50,7 +50,7 @@ class Vaccionation extends Model
     }
     public function schedules()
     {
-        return $this->hasMany(VaccionationSchedule::class);
+        return $this->hasMany(VaccinationSchedule::class);
     }
     public function scopeFilterMultiple($query, $type_date, $start_date, $end_date, $state_pay, $specie, $state, $search_pets)
     {

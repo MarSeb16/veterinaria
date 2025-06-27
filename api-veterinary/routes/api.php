@@ -44,6 +44,7 @@ Route::group([
     Route::get("/medical-records/calendar", [MedicalRecordController::class, "calendar"]);
     Route::put("/medical-records/update_aux/{id}", [MedicalRecordController::class, "update_aux"]);
 
+    Route::post("vaccinations/index", [VaccinationController::class, "index"]);
     Route::resource("vaccinations", VaccinationController::class);
 });
 Route::get("appointment-excel", [AppointmentController::class, "downloadExcel"]);

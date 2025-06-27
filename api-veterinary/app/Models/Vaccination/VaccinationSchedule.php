@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class VaccionationSchedule extends Model
+class VaccinationSchedule extends Model
 {
     use HasFactory;
     protected $fillable = [
@@ -17,7 +17,7 @@ class VaccionationSchedule extends Model
     ];
     public function vaccination()
     {
-        return $this->belongsTo(Vaccionation::class, "vaccination_id");
+        return $this->belongsTo(Vaccination::class, "vaccination_id");
     }
     public function schedule_hour()
     {

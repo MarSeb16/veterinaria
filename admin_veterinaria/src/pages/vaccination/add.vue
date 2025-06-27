@@ -15,7 +15,7 @@ const select_pet = ref(null)
 const items = ref([])
 const veterinarie_id = ref(null)
 const reason = ref(null)
-const vaccine_name = ref(null);
+const vaccine_names = ref(null)
 const nex_due_date = ref(null);
 const outside = ref('0');
 
@@ -41,8 +41,8 @@ const method_payments = ref(['EFECTIVO', 'PAGO POR QR', 'YAPE'])
 const canSubmit = computed(() => {
     return (
         form.value.vaccination_date &&
-        form.value.time &&
         reason.value &&
+        vaccine_names.value &&
         select_pet.value &&
         form.value.amount &&
         form.value.amount_add !== null &&
@@ -119,11 +119,13 @@ const addSelectedSegmentTimeHour = (veterinarie_time, segment_time_group) => {
             selected_segment_times.value.splice(index, 1)
             segment_time_veterinaries.value.splice(index, 1)
         } else {
-            selected_segment_times.value.push({
-                veterinarie_id: veterinarie_time.id,
-                segment_time_id: segment_time.veterinarie_schedule_hour_id
-            })
-            segment_time_veterinaries.value.push(veterinarie_time.id + '-' + segment_time.veterinarie_schedule_hour_id)
+            if (!segment_time.check) {
+                selected_segment_times.value.push({
+                    veterinarie_id: veterinarie_time.id,
+                    segment_time_id: segment_time.veterinarie_schedule_hour_id
+                })
+                segment_time_veterinaries.value.push(veterinarie_time.id + '-' + segment_time.veterinarie_schedule_hour_id)
+            }
         }
     })
 
@@ -143,6 +145,9 @@ const fieldsClean = () => {
     segment_time_veterinaries.value = []
     select_pet.value = null
     reason.value = null
+    vaccine_names.value = null
+    nex_due_date.value = null
+    outside.value = '0'
 }
 
 const store = async () => {
@@ -174,7 +179,10 @@ const store = async () => {
             state_pay: STATE_PAY,
             method_payment: form.value.method_payment,
             adelanto: form.value.amount_add,
-            selected_segment_times: selected_segment_times.value
+            selected_segment_times: selected_segment_times.value,
+            vaccine_names: vaccine_names.value,
+            outside: outside.value,
+            nex_due_date: nex_due_date.value
         }
         const resp = await $api('/vaccinations', {
             method: 'POST',
@@ -320,7 +328,7 @@ definePage({
                                 placeholder="Describe el motivo de poner la vacuna" class="mt-4" />
                         </v-col>
                         <v-col cols="12" md="5">
-                            <VTextarea v-model="vaccine_name" label="Vacunas"
+                            <VTextarea v-model="vaccine_names" label="Vacunas"
                                 placeholder="Describe el motivo de la vacuna" class="mt-4" />
                         </v-col>
                         <v-col cols="12" md="5">

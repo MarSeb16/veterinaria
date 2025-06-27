@@ -10,6 +10,7 @@ use App\Models\Appointment\Appointment;
 use App\Models\Appointment\AppointmentPayment;
 use App\Models\Appointment\AppointmentSchedule;
 use App\Models\Pets\Pet;
+use App\Models\Vaccination\Vaccination;
 use App\Models\Veterinarie\VeterinarieScheduleDay;
 use App\Models\Veterinarie\VeterinarieScheduleJoin;
 use Carbon\Carbon;
@@ -41,6 +42,9 @@ class AppointmentController extends Controller
     public function filter(Request $request)
     {
         $date_appointment = $request->date_appointment;
+        if (!$date_appointment) {
+            $date_appointment = $request->vaccination_date;
+        }
         $hour = $request->hour;
         date_default_timezone_set('America/La_Paz');
         Carbon::setLocale('es');
@@ -59,11 +63,22 @@ class AppointmentController extends Controller
                     }
                 })->get();
             foreach ($segment_time_joins as $segment_time_join) {
+
                 $check = Appointment::whereDate("date_appointment", $date_appointment)
+                    ->where("state", "<>", 2)
                     ->where("veterinarie_id", $veterinarie_day->veterinarie_id)
                     ->whereHas("schedules", function ($query) use ($segment_time_join) {
                         $query->where("veterinarie_schedule_hour_id", $segment_time_join->veterinarie_schedule_hour_id);
                     })->first();
+
+                if (!$check) {
+                    $check = Vaccination::whereDate("vaccination_date", $date_appointment)
+                        ->where("state", "<>", 2)
+                        ->where("veterinarie_id", $veterinarie_day->veterinarie_id)
+                        ->whereHas("schedules", function ($query) use ($segment_time_join) {
+                            $query->where("veterinarie_schedule_hour_id", $segment_time_join->veterinarie_schedule_hour_id);
+                        })->first();
+                }
                 $segment_time_formats->push([
                     "id" => $segment_time_join->id,
                     "veterinarie_schedule_day_id" => $segment_time_join->veterinarie_schedule_day_id,

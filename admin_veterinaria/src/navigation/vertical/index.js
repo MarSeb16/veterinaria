@@ -93,13 +93,13 @@ export default [
       {
         title: 'Registrar',
         to: 'vaccination-add',
-        permission: 'register_vaccionation',
+        permission: 'register_vaccination',
         icon: { icon: 'ri-coins-line' },
       },
       {
         title: 'Listado',
         to: 'vaccination-list',
-        permission: 'list_vaccionation',
+        permission: 'list_vaccination',
         icon: { icon: 'ri-coins-line' },
       },
     ],
