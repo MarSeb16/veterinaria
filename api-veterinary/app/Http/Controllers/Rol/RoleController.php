@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Rol;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use PhpParser\Node\Stmt\Return_;
 use Spatie\Permission\Models\Role;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Gate;
 
 class RoleController extends Controller
 {
@@ -14,14 +14,13 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
+        Gate::authorize('viewAny',Role::class);
         $search = $request->get("search");
-
-        $roles = Role::when($search, function ($query, $search) {
-            $query->where("name", "ILIKE", "%{$search}%"); // PostgreSQL-friendly
-        })->orderBy("id", "asc")->get();
+        
+        $roles = Role::where("name","ilike","%".$search."%")->orderBy("id","desc")->get();
 
         return response()->json([
-            "roles" => $roles->map(function ($rol) {
+            "roles" => $roles->map(function($rol) {
                 return [
                     "id" => $rol->id,
                     "name" => $rol->name,
@@ -33,26 +32,29 @@ class RoleController extends Controller
         ]);
     }
 
-
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        $exist_role = Role::where("name", $request->name)->first();
-        if ($exist_role) {
+        Gate::authorize('create',Role::class);
+        $exist_role = Role::where("name",$request->name)->first();
+        if($exist_role){
             return response()->json([
                 "message" => 403,
                 "message_text" => "EL NOMBRE DEL ROL YA EXISTE"
             ]);
         }
+
         $role = Role::create([
             "name" => $request->name,
             "guard_name" => "api"
         ]);
+
         foreach ($request->permissions as $key => $permission) {
             $role->givePermissionTo($permission);
         }
+
         return response()->json([
             "message" => 200
         ]);
@@ -71,13 +73,15 @@ class RoleController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $exist_role = Role::where("name", $request->name)->where("id", "<>", $id)->first();
-        if ($exist_role) {
+        Gate::authorize('update',Role::class);
+        $exist_role = Role::where("name",$request->name)->where("id","<>",$id)->first();
+        if($exist_role){
             return response()->json([
                 "message" => 403,
                 "message_text" => "EL NOMBRE DEL ROL YA EXISTE"
             ]);
         }
+
         $role = Role::findOrFail($id);
         $role->update([
             "name" => $request->name
@@ -93,8 +97,10 @@ class RoleController extends Controller
      */
     public function destroy(string $id)
     {
+        Gate::authorize('delete',Role::class);
         $role = Role::findOrFail($id);
         $role->delete();
+
         return response()->json([
             "message" => 200
         ]);

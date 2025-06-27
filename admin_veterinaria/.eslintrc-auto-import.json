@@ -352,6 +352,7 @@
     "watchWithFilter": true,
     "whenever": true,
     "PERMISOS": true,
+    "isPermission": true,
     "useStaffs": true
   }
 }

@@ -12,7 +12,7 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can("list_staff") ? true : false;
     }
 
     /**
@@ -20,7 +20,7 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        return false;
+        //
     }
 
     /**
@@ -28,26 +28,23 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        if ($user->can('publish articles')) {
-            return true;
-        }
-        return false;
+        return $user->can("register_staff") ? true : false;
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, User $model): bool
+    public function update(User $user, User $model = null): bool
     {
-        return false;
+        return $user->can("edit_staff") ? true : false;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, User $model): bool
+    public function delete(User $user, User $model = null): bool
     {
-        return false;
+        return $user->can("delete_staff") ? true : false;
     }
 
     /**
@@ -55,7 +52,7 @@ class UserPolicy
      */
     public function restore(User $user, User $model): bool
     {
-        return false;
+        //
     }
 
     /**
@@ -63,6 +60,6 @@ class UserPolicy
      */
     public function forceDelete(User $user, User $model): bool
     {
-        return false;
+        //
     }
 }

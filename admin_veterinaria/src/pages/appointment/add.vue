@@ -1,140 +1,137 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { Spanish } from 'flatpickr/dist/l10n/es.js'
-
-const error_exists = ref(null)
-const success = ref(null)
-const warning = ref(null)
-const veterinarie_time_availability = ref([])
-const segment_time_veterinaries = ref([])
-const selected_segment_times = ref([])
-const loading = ref(false)
-const search = ref()
-const select_pet = ref(null)
-const items = ref([])
-const veterinarie_id = ref(null)
-const reason = ref(null)
-
-const datePickerConfig = {
-    locale: Spanish,
-    altInput: true,
-    altFormat: 'd/m/Y',
-    dateFormat: 'Y-m-d',
-    allowInput: true,
-    monthSelectorType: 'dropdown'
-}
 
 const form = ref({
     date_appointment: null,
     time: null,
     amount: 0,
     method_payment: 'EFECTIVO',
-    amount_add: 0
+    amount_add: 0,
 })
-
-const method_payments = ref(['EFECTIVO', 'PAGO POR QR', 'YAPE'])
-
-const canSubmit = computed(() => {
-    return (
-        form.value.date_appointment &&
-        form.value.time &&
-        reason.value &&
-        select_pet.value &&
-        form.value.amount &&
-        form.value.amount_add !== null &&
-        selected_segment_times.value.length > 0
-    )
-})
-
+const warning = ref(null);
+const success = ref(null);
+const error_exists = ref(null);
+const method_payments = ref([
+    "EFECTIVO",
+    "DEPOSITO",
+    "YAPE",
+    "PLIN"
+]);
+const veterinarie_time_availability = ref([]);
+const segment_time_veterinaries = ref([]);
+const selected_segment_times = ref([]);
+const veterinarie_id = ref(null);
+const reason = ref(null);
 const filter = async () => {
-    if (!form.value.date_appointment) {
-        warning.value = 'Es necesario ingresar una fecha'
-        return
-    }
     try {
-        const data = {
-            date_appointment: form.value.date_appointment,
-            hour: form.value.time
+        if(!form.value.date_appointment){
+            warning.value = "Es necesario ingresar un fecha";
+            return ;
         }
-        const resp = await $api('/appointments/filter-availability', {
+        let data = {
+            date_appointment: form.value.date_appointment,
+            hour: form.value.time,
+        }
+        const resp =  await $api('/appointments/filter-availability',{
             method: 'POST',
-            body: data,
-            onResponseError({ response }) {
-                error_exists.value = response._data?.error || 'Error desconocido'
+            body:data,
+            onResponseError({response}){
+                console.log(response);
+                error_exists.value = response._data.error;
             }
         })
-        warning.value = null
-        veterinarie_time_availability.value = resp.veterinarie_time_availability
+        console.log(resp);
+        warning.value = null;
+        veterinarie_time_availability.value = resp.veterinarie_time_availability;
     } catch (error) {
-        console.log(error)
+        console.log(error);
     }
-}
 
+}
+const selectedSegmentHour = (veterinarie_time,segment_time_group) => {
+    veterinarie_time.segment_times = segment_time_group.segment_times;
+    selected_segment_times.value = [];
+    segment_time_veterinaries.value = [];
+    console.log(selected_segment_times.value);
+}
 const reset = () => {
-    form.value.date_appointment = null
-    form.value.time = null
-    veterinarie_time_availability.value = []
-    segment_time_veterinaries.value = []
-    selected_segment_times.value = []
+    form.value.date_appointment = null;
+    form.value.time = null;
+    veterinarie_time_availability.value = [];
+    segment_time_veterinaries.value = [];
+    selected_segment_times.value = [];
+    reason.value = null;
 }
+const addSelectedSegmentTime = (veterinarie_time,segment_time) => {
 
-const selectedSegmentHour = (veterinarie_time, segment_time_group) => {
-    veterinarie_time.segment_times = segment_time_group.segment_times
-    selected_segment_times.value = []
-    segment_time_veterinaries.value = []
-}
-
-const addSelectedSegmentTime = (veterinarie_time, segment_time) => {
-    const index = selected_segment_times.value.findIndex(item =>
-        item.veterinarie_id === veterinarie_time.id && item.segment_time_id === segment_time.veterinarie_schedule_hour_id
-    )
-    if (index !== -1) {
-        selected_segment_times.value.splice(index, 1)
-    } else {
+    let INDEX = selected_segment_times.value.findIndex(item => item.veterinarie_id == veterinarie_time.id && item.segment_time_id == segment_time.veterinarie_schedule_hour_id);
+    if(INDEX != -1){
+        selected_segment_times.value.splice(INDEX,1);
+    }else{
         selected_segment_times.value.push({
             veterinarie_id: veterinarie_time.id,
-            segment_time_id: segment_time.veterinarie_schedule_hour_id
-        })
+            segment_time_id: segment_time.veterinarie_schedule_hour_id,
+        });
     }
-    veterinarie_id.value = veterinarie_time.id
-    selected_segment_times.value = selected_segment_times.value.filter(item => item.veterinarie_id === veterinarie_time.id)
-    segment_time_veterinaries.value = segment_time_veterinaries.value.filter(item => item.indexOf(`${veterinarie_time.id}-`) !== -1)
+    veterinarie_id.value = veterinarie_time.id;
+    selected_segment_times.value = selected_segment_times.value.filter((item) => {
+        return item.veterinarie_id == veterinarie_time.id;
+    });
+    segment_time_veterinaries.value = segment_time_veterinaries.value.filter((item) => {
+        return item.indexOf(veterinarie_time.id+"-") != -1;
+    })
+    console.log(selected_segment_times.value);
 }
-
 const fieldsClean = () => {
-    form.value.date_appointment = null
-    form.value.time = null
-    form.value.amount = 0
-    form.value.method_payment = 'EFECTIVO'
-    form.value.amount_add = 0
-    veterinarie_time_availability.value.forEach(vet => (vet.segment_times = []))
-    selected_segment_times.value = []
-    segment_time_veterinaries.value = []
-    select_pet.value = null
-    reason.value = null
+    form.value.date_appointment = null;
+    form.value.time = null;
+    form.value.amount = 0;
+    form.value.method_payment = 'EFECTIVO';
+    form.value.amount_add = 0;
+    veterinarie_time_availability.value = [];
+    segment_time_veterinaries.value = [];
+    selected_segment_times.value = [];
+    select_pet.value = null;
+    reason.value = null;
 }
-
-const store = async () => {
-    warning.value = null
-
-    if (parseFloat(form.value.amount_add) > parseFloat(form.value.amount)) {
-        warning.value = 'El costo de adelanto no puede ser mayor al costo de la cita'
-        return
-    }
-
-    let STATE_PAY = 1
-    const amount = parseFloat(form.value.amount)
-    const amount_add = parseFloat(form.value.amount_add)
-
-    if (!amount_add || amount_add === 0) {
-        STATE_PAY = 1 // Pendiente
-    } else if (amount_add < amount) {
-        STATE_PAY = 2 // Parcial
-    } else if (amount_add === amount) {
-        STATE_PAY = 3 // Completo
-    }
+const store = async() => {
     try {
-        const data = {
+        warning.value = null;
+        if(!form.value.date_appointment){
+            warning.value = "El campo de fecha es requerido";
+            return;
+        }
+        if(selected_segment_times.value.length == 0){
+            warning.value = "Es necesario asignarle un horario a la cita medica";
+            return;
+        }
+        if(!reason.value){
+            warning.value = "Es requerido digitar una razon para la atención de la mascota";
+            return;
+        }
+        if(!select_pet.value){
+            warning.value = "Es requerido seleccionar una mascota";
+            return;
+        }
+        if(!form.value.amount){
+            warning.value = "Es requerido ingresar el costo de la cita medica";
+            return;
+        }
+        if(!form.value.amount_add){
+            warning.value = "Es requerido ingresar un adelanto del costo de la cita medica";
+            return;
+        }
+        if(parseInt(form.value.amount_add) > parseInt(form.value.amount)){
+            warning.value = "El monto de adelanto no puede ser mayor al costo de la cita";
+            return;
+        }
+        let STATE_PAY = 1;//PENDIENTE
+        if(form.value.amount > form.value.amount_add){
+            STATE_PAY = 2;//PARCIAL
+        }
+        if(form.value.amount == form.value.amount_add){
+            STATE_PAY = 3;//COMPLETO
+        }
+        let data = {
             veterinarie_id: veterinarie_id.value,
             pet_id: select_pet.value.id,
             date_appointment: form.value.date_appointment,
@@ -143,235 +140,278 @@ const store = async () => {
             state_pay: STATE_PAY,
             method_payment: form.value.method_payment,
             adelanto: form.value.amount_add,
-            selected_segment_times: selected_segment_times.value
+            selected_segment_times: selected_segment_times.value,
         }
-        const resp = await $api('/appointments', {
+        const resp =  await $api('/appointments',{
             method: 'POST',
-            body: data,
-            onResponseError({ response }) {
-                error_exists.value = response._data?.error || 'Error desconocido'
+            body:data,
+            onResponseError({response}){
+                console.log(response);
+                error_exists.value = response._data.error;
             }
         })
-
-        success.value = 'La cita médica se ha programado correctamente'
-
+        console.log(resp);
+        success.value = "La cita medica se ha programado correctamente";
         setTimeout(() => {
-            success.value = null
-            warning.value = null
-            error_exists.value = null
+            success.value = null;
+            warning.value = null;
+            error_exists.value = null;
             fieldsClean()
-        }, 2500)
+        }, 1500);
     } catch (error) {
-        console.log(error)
+        console.log(error);
     }
 }
+// CODIGO PARA LA BUSQUEDA DEL PACIENTE(MASCOTA)
+const loading = ref(false)
+const search = ref()
+const select_pet = ref(null)
+const items = ref([])
+const querySelections = async (query) => {
+  loading.value = true
 
-const querySelections = async query => {
-    loading.value = true
-    setTimeout(async () => {
-        const resp = await $api(`/appointments/search-pets/${query}`, {
-            method: 'GET',
-            onResponseError({ response }) {
-                error_exists.value = response._data.error
-            }
-        })
-        items.value = resp.pets
-        loading.value = false
-    }, 500)
+  // Simulated ajax query
+  setTimeout(async () => {
+    // items.value = states.filter(state => (state || '').toLowerCase().includes((query || '').toLowerCase()))
+    const resp = await $api("/appointments/search-pets/"+query,{
+        method: 'GET',
+        onResponseError({response}){
+            console.log(response);
+            error_exists.value = response._data.error;
+        }
+    })
+    console.log(resp);
+    items.value = resp.pets;
+    loading.value = false
+  }, 500)
 }
-
 watch(search, query => {
-    if (query && query.length > 1) querySelections(query)
-    else items.value = []
+    if(query &&  query.length > 1){
+        querySelections(query)
+    }else{
+        items.value = [];
+    }
+//    query && query !== select.value && querySelections(query)
 })
-
+// FIN DE LA BUSQUEDA DEL PACIENTE
 definePage({
     meta: {
-        Permission: 'register_appointment'
-    }
+        permisssion: 'register_appointment'
+    },
 })
 </script>
 <template>
-    <Transition name="fade">
-        <VCard class="pa-3 pa-sm-8 rounded-lg mb-6" elevation="4">
-            <VCardText>
-                <div class="text-center">
-                    <h4 class="section-title">Agregar Cita Médica</h4>
-                    <p class="section-subtitle">Completa los datos requeridos</p>
-                </div>
-            </VCardText>
-            <v-divider class="mb-4" />
+    <div>
+        <VCardText class="pa-5">
+            <div class="mb-1">
+            <h4 class="text-h4 text-center mb-1">
+                Agregar Citas Medicas 👩‍💻
+            </h4>
+            </div>
+        </VCardText>
 
-            <v-row dense>
-                <v-col cols="12" md="4">
-                    <AppDateTimePicker v-model="form.date_appointment" label="Fecha de la cita" dense outlined :config="{
-                        ...datePickerConfig,
-                        minDate: 'today',
-                        disable: [date => date.getDay() === 0 || date.getDay() === 6]
-                    }" />
-                </v-col>
-                <v-col cols="12" md="4">
-                    <AppDateTimePicker v-model="form.time" label="Hora de la cita"
-                        :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i' }" />
-                </v-col>
-                <div class="d-flex align-center gap-x-2 mt-2">
-                    <VBtn color="info" icon @click="filter">
-                        <i class="ri-search-2-line" />
+        <VCard title="🔎 Busqueda:" class="pa-4">
+            <VRow>
+                <VCol cols="4">
+                    <AppDateTimePicker
+                        v-model="form.date_appointment"
+                        label="Fecha de la cita"
+                        :config="{ minDate: 'today',disable: [
+                            (date) => {
+                                // Deshabilita sábados (6) y domingos (0)
+                                return date.getDay() === 0 || date.getDay() === 6;
+                            },
+                        ]}"
+                    />
+                </VCol>
+                <VCol cols="3">
+                    <AppDateTimePicker
+                        v-model="form.time"
+                        label="Hora de la cita"
+                        :config="{ enableTime: true, noCalendar: true, dateFormat: 'H:i' }"
+                    />
+                </VCol>
+                <VCol cols="3">
+                    <VBtn
+                        color="info"
+                        class="mx-1"
+                        prepend-icon="ri-search-2-line"
+                        @click="filter()"
+                    >
                     </VBtn>
-                    <VBtn color="secondary" icon @click="reset">
-                        <i class="ri-restart-line" />
+                    <VBtn
+                        color="secondary"
+                        class="mx-1"
+                        prepend-icon="ri-restart-line"
+                        @click="reset()"
+                    >
                     </VBtn>
-                </div>
-            </v-row>
+                </VCol>
+            </VRow>
         </VCard>
-    </Transition>
 
-    <v-col cols="12">
-        <VAlert v-if="error_exists" type="error" dense class="mb-2">{{ error_exists }}</VAlert>
-        <VAlert v-if="warning" type="warning" dense class="mb-2">{{ warning }}</VAlert>
-        <VAlert v-if="success" type="success" dense class="mb-2">{{ success }}</VAlert>
-    </v-col>
+        <VAlert type="warning" class="mt-3" v-if="warning">
+        <strong>{{ warning }}</strong>
+        </VAlert>
+        <VAlert type="error" class="mt-3" v-if="error_exists">
+        <strong>En el servidor hubo un error al guardar</strong>
+        </VAlert>
+        <VAlert type="success" class="mt-3" v-if="success">
+        <strong>{{ success }}</strong>
+        </VAlert>
 
-    <Transition name="fade">
-        <VCard class="pa-3 pa-sm-8 rounded-lg mb-6" elevation="4">
-            <v-divider class="mb-4" />
-            <h6 class="section-title">Disponibilidad</h6>
-            <v-row dense>
-                <v-col cols="12">
+        <VCard title="📅 Disponibilidad:" class="pa-4 mt-4">
+            <VRow>
+                <VCol cols="8">
                     <VTable>
-                        <thead>
+                      <thead>
+                        <tr>
+                            <th class="text-uppercase">
+                            Veterinario
+                            </th>
+                            <th class="text-uppercase">
+                            Tiempos activos
+                            </th>
+                            <th class="text-uppercase">
+                            Segmentos de tiempos
+                            </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {{ segment_time_veterinaries }}
+                        <template v-for="(veterinarie_time, index) in veterinarie_time_availability" :key="index">
                             <tr>
-                                <th>Veterinario</th>
-                                <th>Tiempos activos</th>
-                                <th>Segmentos</th>
+                                <td>
+                                    {{ veterinarie_time.full_name }}
+                                </td>
+                                <td>
+                                    <ul>
+                                        <li v-for="(segment_time_group, index) in veterinarie_time.segment_time_groups" :key="index" style="list-style: none;">
+                                            <VBtn
+                                                color="success"
+                                                class="mx-1"
+                                                prepend-icon="ri-file-add-line"
+                                                variant="text"
+                                                @click="selectedSegmentHour(veterinarie_time,segment_time_group)"
+                                            >
+                                            </VBtn>
+                                            {{ segment_time_group.hour_format}}({{ segment_time_group.count_availability }})</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        <li v-for="(segment_time, index) in veterinarie_time.segment_times" :key="index" style="list-style: none;">
+                                            <VCheckbox
+                                            v-if="!segment_time.check"
+                                            @click="addSelectedSegmentTime(veterinarie_time,segment_time)"
+                                            v-model="segment_time_veterinaries"
+                                            :label="segment_time.schedule_hour.hour_start_format+' '+segment_time.schedule_hour.hour_end_format"
+                                            :value="veterinarie_time.id+'-'+segment_time.veterinarie_schedule_hour_id"
+                                            />
+                                            <label for="" style="font-weight: bold;" v-if="segment_time.check">{{ segment_time.schedule_hour.hour_start_format+' '+segment_time.schedule_hour.hour_end_format }}</label>
+                                        </li>
+                                        <!-- 
+                                        <li style="list-style: none;">
+                                            <VCheckbox
+                                            label="10:15 AM 10:30 AM"
+                                            />
+                                        </li>
+                                        <li style="list-style: none;">
+                                            <VCheckbox
+                                            label="10:30 AM 10:45 AM"
+                                            />
+                                        </li>
+                                        <li style="list-style: none;">
+                                            <VCheckbox
+                                            label="10:45 AM 11:00 AM"
+                                            />
+                                        </li> -->
+                                    </ul>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <template v-for="(veterinarie_time, index) in veterinarie_time_availability" :key="index">
-                                <tr>
-                                    <td>{{ veterinarie_time.full_name }}</td>
-                                    <td>
-                                        <ul>
-                                            <li v-for="(group, i) in veterinarie_time.segment_time_groups" :key="i"
-                                                class="list-none">
-                                                <VBtn color="success" icon
-                                                    @click="selectedSegmentHour(veterinarie_time, group)">
-                                                    <i class="ri-file-add-line" />
-                                                </VBtn>
-                                                {{ group.hour_format }} ({{ group.segment_times.length }})
-                                            </li>
-                                        </ul>
-                                    </td>
-                                    <td>
-                                        <ul>
-                                            <li v-for="(segment_time, i) in veterinarie_time.segment_times" :key="i"
-                                                class="list-none">
-                                                <VCheckbox v-if="!segment_time.check"
-                                                    v-model="segment_time_veterinaries"
-                                                    :label="segment_time.schedule_hour.hour_start_format + ' - ' + segment_time.schedule_hour.hour_end_format"
-                                                    :value="veterinarie_time.id + '-' + segment_time.veterinarie_schedule_hour_id"
-                                                    @click="addSelectedSegmentTime(veterinarie_time, segment_time)" />
-                                            </li>
-                                        </ul>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
+                        </template>
+                      </tbody>
                     </VTable>
-                    <VTextarea v-model="reason" label="Razón de la cita" placeholder="Describe el motivo de atención"
-                        class="mt-4" />
-                </v-col>
-            </v-row>
+                </VCol>
+                <VCol cols="5">
+                    <VTextarea
+                        v-model="reason"
+                        label="Razon de la cita:"
+                        placeholder="Text"
+                    />
+                </VCol>
+            </VRow>
         </VCard>
-    </Transition>
-
-    <Transition name="fade">
-        <VCard class="pa-3 pa-sm-8 rounded-lg mb-6" elevation="4">
-            <v-divider class="mb-4" />
-            <h6 class="section-title">Paciente</h6>
-            <v-row dense>
-                <v-col cols="12" md="4">
-                    <VAutocomplete v-model="select_pet" item-title="name" item-value="id" return-object
-                        v-model:search="search" :loading="loading" :items="items" placeholder="Buscar mascota"
-                        label="¿Quién es la mascotita?" variant="underlined" :menu-props="{ maxHeight: '200px' }" />
-                </v-col>
-                <v-col cols="12" md="4" v-if="select_pet">
-                    <p>Especie: {{ select_pet.specie }}</p>
-                    <p>Raza: {{ select_pet.breed }}</p>
-                </v-col>
-                <v-col cols="12" md="4" v-if="select_pet">
-                    <p>Dueño: {{ select_pet.owner.first_name }} {{ select_pet.owner.last_name }}</p>
-                    <p>Teléfono: {{ select_pet.owner.phone }}</p>
-                    <p>CI: {{ select_pet.owner.n_document }}</p>
-                </v-col>
-            </v-row>
+        <VCard title="🐶 Paciente:" class="pa-4 mt-4">
+            <VRow>
+                <VCol cols="4">
+                    <VAutocomplete
+                        v-model="select_pet"
+                        v-model:search="search"
+                        :loading="loading"
+                        :items="items"
+                        item-title="name"
+                        item-value="id"
+                        return-object
+                        placeholder="Ingresa información de la mascota"
+                        label="¿Quien es la mascotita?"
+                        variant="underlined"
+                        :menu-props="{ maxHeight: '200px' }"
+                    />
+                </VCol>
+                <VCol cols="2" v-if="select_pet">
+                    <label for="">Especie: {{ select_pet.specie }}</label>
+                    <br>
+                    <label for="">Raza: {{ select_pet.breed }}</label>
+                </VCol>
+                <VCol cols="3" v-if="select_pet">
+                    <label for="">Nombre y Apellido: {{ select_pet.owner.first_name+ ' ' + select_pet.owner.last_name }}</label>
+                    <br>
+                    <label for="">Telefono: {{ select_pet.owner.phone }}</label>
+                    <br>
+                    <label for="">Documento: {{ select_pet.owner.n_document }}</label>
+                </VCol>
+            </VRow>
         </VCard>
-    </Transition>
-
-    <Transition name="fade">
-        <VCard class="pa-3 pa-sm-8 rounded-lg" elevation="4">
-            <v-divider class="mb-4" />
-            <h6 class="section-title">Pagos</h6>
-            <v-row dense>
-                <v-col cols="12" md="4">
-                    <VTextField label="Costo de la cita" type="number" placeholder="Ej.: 100 Bs."
-                        v-model="form.amount" />
-                </v-col>
-                <v-col cols="12" md="4">
-                    <VSelect :items="method_payments" label="Método de pago" placeholder="Selecciona método"
-                        v-model="form.method_payment" outlined dense />
-                </v-col>
-                <v-col cols="12" md="4">
-                    <VTextField label="Adelanto" type="number" placeholder="Ej.: 50 Bs." v-model="form.amount_add" />
-                </v-col>
-            </v-row>
+        <VCard title="💵 Pagos:" class="pa-4 mt-4">
+            <VRow>
+                <VCol cols="4">
+                    <VTextField
+                        label="Costo de la cita:"
+                        type="number"
+                        placeholder="Example: 100"
+                        v-model="form.amount"
+                        />
+                </VCol>
+            </VRow>
+            <VRow>
+                <VCol cols="4">
+                    <VSelect
+                        v-model="form.method_payment"
+                        :items="method_payments"
+                        label="Metodos de pago"
+                        item-title="name"
+                        item-value="id"
+                        placeholder="Select Metodo"
+                        eager
+                    />
+                </VCol>
+                <VCol cols="4">
+                    <VTextField
+                        v-model="form.amount_add"
+                        label="Adelanto:"
+                        type="number"
+                        placeholder="Example: 100"
+                        />
+                </VCol>
+            </VRow>
         </VCard>
-    </Transition>
 
-    <v-col cols="12" class="text-center mt-4">
-        <VBtn color="primary" size="large" class="px-8 text-subtitle-1" elevation="2" :disabled="!canSubmit"
-            @click="store">
-            Registrar cita médica
-        </VBtn>
-    </v-col>
+        <VCardText class="pa-5 py-0 text-end">
+            <VBtn color="primary" class="mb-4" @click="store()">
+            Crear
+            </VBtn>
+        </VCardText>
+    </div>
 </template>
-<style scoped>
-.v-btn__prepend {
-    margin-inline: 0 !important;
-}
-
-.section-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-}
-
-.section-subtitle {
-    color: #6c757d;
-    margin-bottom: 1.5rem;
-}
-
-.v-card {
-    border-radius: 12px;
-}
-
-.v-text-field input[type='number']::-webkit-inner-spin-button,
-.v-text-field input[type='number']::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.v-text-field input[type='number'] {
-    -moz-appearance: textfield;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.4s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-}
-</style>

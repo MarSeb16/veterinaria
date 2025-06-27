@@ -2,20 +2,35 @@
 
 namespace App\Models\Appointment;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class AppointmentPayment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
     protected $fillable = [
         "appointment_id",
         "method_payment",
-        "amount"
+        "amount",
+        // "created_at"
     ];
-    public function appointment()
+
+    public function setCreatedAtAttribute($value)
     {
-        return $this->belongsTo(Appointment::class, "appointment_id");
+    	date_default_timezone_set('America/Lima');
+        $this->attributes["created_at"]= Carbon::now();
+    }
+
+    public function setUpdatedAtAttribute($value)
+    {
+    	date_default_timezone_set("America/Lima");
+        $this->attributes["updated_at"]= Carbon::now();
+    }
+
+    public function appointment(){
+        return $this->belongsTo(Appointment::class,"appointment_id");
     }
 }

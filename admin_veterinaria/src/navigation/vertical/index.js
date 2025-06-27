@@ -2,10 +2,10 @@ export default [
   {
     title: 'Dashboard',
     to: { name: 'dashboard' },
-    permission: 'all',
+    permission: "all",
     icon: { icon: 'ri-bar-chart-2-line' },
   },
-  { heading: 'Accesos', permissions: ['list_rol', 'list_staff'] },
+  { heading: 'Accesos',permissions: ['list_rol','list_staff'] },
   {
     title: 'Roles y Permisos',
     to: { name: 'roles-y-permisos' },
@@ -18,7 +18,7 @@ export default [
     permission: 'list_staff',
     icon: { icon: 'ri-group-line' },
   },
-  { heading: 'Gestion', permissions: ['register_veterinary', 'list_veterinary', 'register_pet', 'list_pet'] },
+  { heading: 'Gestion',permissions: ['register_veterinary','list_veterinary','register_pet','list_pet'] },
   {
     title: 'Veterinario',
     icon: { icon: 'ri-nurse-fill' },
@@ -55,7 +55,7 @@ export default [
       },
     ],
   },
-  { heading: 'Agenda', permissions: ['register_appointment', 'list_appointment', 'calendar', 'show_payment', 'register_vaccionation', 'list_vaccionation', 'register_surgeries', 'list_surgeries', 'show_medical_records'] },
+  { heading: 'Agenda',permissions: ['register_appointment','list_appointment','calendar','show_payment','register_vaccionation','list_vaccionation','register_surgeries','list_surgeries','show_medical_records'] },
   {
     title: 'Citas Medicas',
     icon: { icon: 'ri-list-check-3' },
@@ -81,12 +81,6 @@ export default [
     to: 'medical-record-calendar',
   },
   {
-    title: 'Pagos',
-    icon: { icon: 'ri-coins-line' },
-    permission: 'show_payment',
-    to: 'second-page',
-  },
-  {
     title: 'Vacunas',
     icon: { icon: 'ri-syringe-line' },
     children: [
@@ -94,37 +88,43 @@ export default [
         title: 'Registrar',
         to: 'vaccination-add',
         permission: 'register_vaccionation',
-        icon: { icon: 'ri-coins-line' },
+        icon: { icon: 'ri-radio-button-line' },
       },
       {
         title: 'Listado',
         to: 'vaccination-list',
         permission: 'list_vaccionation',
-        icon: { icon: 'ri-coins-line' },
+        icon: { icon: 'ri-radio-button-line' },
       },
     ],
   },
   {
-    title: 'Procedimientos quirúrgicos',
+    title: 'Cirugías',
     icon: { icon: 'ri-microscope-line' },
     children: [
       {
         title: 'Registrar',
-        to: 'second-page',
+        to: 'surgerie-add',
         permission: 'register_surgeries',
-        icon: { icon: 'ri-computer-line' },
+        icon: { icon: 'ri-radio-button-line' },
       },
       {
         title: 'Listado',
-        to: 'second-page',
+        to: 'surgerie-list',
         permission: 'list_surgeries',
-        icon: { icon: 'ri-bar-chart-line' },
+        icon: { icon: 'ri-radio-button-line' },
       },
     ],
   },
   {
+    title: 'Pagos',
+    icon: { icon: 'ri-coins-line' },
+    permission: 'show_payment',
+    to: 'payments-list',
+  },
+  {
     title: 'Historial Medico',
-    to: { name: 'second-page' },
+    to: { name: 'medical-record' },
     icon: { icon: 'ri-draft-line' },
     permission: 'show_medical_records',
   },

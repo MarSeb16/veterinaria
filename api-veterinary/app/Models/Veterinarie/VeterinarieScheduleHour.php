@@ -11,6 +11,6 @@ class VeterinarieScheduleHour extends Model
     protected $fillable = [
         "hour_start",
         "hour_end",
-        "hour"
+        "hour",
     ];
 }

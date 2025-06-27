@@ -24,19 +24,19 @@ export const blankEvent = {
       name: '',
     },
     veterinarie: {
-      full_name: '',
+      full_name: ''
     },
     state: 1,
     notes: '',
-
   },
 }
+
 const date = new Date()
 const nextDay = new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
 const nextMonth = date.getMonth() === 11 ? new Date(date.getFullYear() + 1, 0, 1) : new Date(date.getFullYear(), date.getMonth() + 1, 1)
 const prevMonth = date.getMonth() === 11 ? new Date(date.getFullYear() - 1, 0, 1) : new Date(date.getFullYear(), date.getMonth() - 1, 1)
 // start: '2024-07-11T18:50:00',
-// end: '2024-07-15T18:50:00',
+    // end: '2024-07-15T18:50:00',
 export const events = [
   {
     id: 1,
@@ -66,7 +66,7 @@ export const events = [
     title: 'Family Trip',
     allDay: true,
     start: new Date('2024-11-21 10:00:00'),//date.getFullYear(), date.getMonth() + 1, -9
-    end: new Date('2024-11-25 10:15:00'),//date.getFullYear(), date.getMonth() + 1, -7
+    end: new Date('2024-11-21 10:15:00'),//date.getFullYear(), date.getMonth() + 1, -7
     extendedProps: {
       calendar: 'Holiday',
     },
@@ -164,16 +164,16 @@ export const useCalendar = (event, isEventHandlerSidebarActive, isLeftSidebarOpe
     Appointment: 'primary',
     Surgeries: 'success',
     Personal: 'error',
-    Vaccinations: 'warning',
+    Vaccination: 'warning',
     ETC: 'info',
   }
 
 
   // ℹ️ Extract event data from event API
   const extractEventDataFromEventApi = eventApi => {
-
-    const { id, title, start, end, url, extendedProps: { calendar, guests, location, description, pet, veterinarie, state, notes, day, amount }, allDay } = eventApi
-
+        
+    const { id, title, start, end, url, extendedProps: { calendar, guests, location, description ,pet,veterinarie,state,notes,day,amount }, allDay } = eventApi
+    
     return {
       id,
       title,
@@ -195,7 +195,7 @@ export const useCalendar = (event, isEventHandlerSidebarActive, isLeftSidebarOpe
       allDay,
     }
   }
-
+    
   if (typeof process !== 'undefined' && process.server)
     store.fetchEvents()
 
@@ -239,7 +239,7 @@ export const useCalendar = (event, isEventHandlerSidebarActive, isLeftSidebarOpe
     const existingEvent = calendarApi.value?.getEventById(String(updatedEventData.id))
     if (!existingEvent) {
       console.warn('Can\'t found event in calendar to update')
-
+      
       return
     }
 
@@ -298,8 +298,8 @@ export const useCalendar = (event, isEventHandlerSidebarActive, isLeftSidebarOpe
       .then(r => {
         const propsToUpdate = ['id', 'title', 'url']
         const extendedPropsToUpdate = ['calendar', 'guests', 'location', 'description']
-
-        updateEventInCalendar(r, propsToUpdate, extendedPropsToUpdate)
+        console.log(r);
+        updateEventInCalendar(r.event, propsToUpdate, extendedPropsToUpdate)
       })
     refetchEvents()
   }
@@ -356,7 +356,7 @@ export const useCalendar = (event, isEventHandlerSidebarActive, isLeftSidebarOpe
     navLinks: true,
     eventClassNames({ event: calendarEvent }) {
       const colorName = calendarsColor[calendarEvent._def.extendedProps.calendar]
-
+      
       return [
         // Background Color
         `bg-light-${colorName} text-${colorName}`,
@@ -424,7 +424,7 @@ export const useCalendar = (event, isEventHandlerSidebarActive, isLeftSidebarOpe
   watch(() => configStore.isAppRTL, val => {
     calendarApi.value?.setOption('direction', val ? 'rtl' : 'ltr')
   }, { immediate: true })
-
+  
   return {
     refCalendar,
     calendarOptions,

@@ -1,155 +1,139 @@
 <script setup>
-import { $api } from '@/utils/api'
-import { onMounted, ref } from 'vue'
-
-const type_documents = ['CI', 'PASAPORTE', 'CARNET DE EXTRANJERIA']
-
 const form = ref({
     name: null,
     surname: null,
     email: null,
     phone: null,
-    type_document: 'CI',
+    type_document: 'DNI',
     n_document: null,
     birthday: null,
     designation: null,
     gender: null,
     role_id: null,
-    password: null
-})
-const FILE_AVATAR = ref(null)
-const IMAGEN_PREVISUALIZADA = ref(null)
+    designation: null,
+    password: null,
+});
+const type_documents = [
+    'DNI',
+    'PASAPORTE',
+    'CARNET DE EXTRANJERIA'
+];
+
 const isPasswordVisible = ref(false)
-const error_exists = ref(null)
-const success = ref(null)
-const warning = ref(null)
-const roles = ref([])
+const warning = ref(null);
+const success = ref(null);
+const error_exists = ref(null);
+const FILE_AVATAR = ref(null);
+const IMAGEN_PREVIZUALIZA = ref(null);
+const roles = ref([]);
+const days = ref(['Lunes','Martes','Miércoles','Jueves','Viernes']);
 const hour_days = ref([]);
 const selected_segment_time = ref([]);
-const schedule_hours_veterinarie = ref([]);
+const schedule_hour_veterinarie = ref([]);
 const load_request = ref(null);
-const loadFile = event => {
-    const file = event.target.files[0]
-    if (!file) {
-        warning.value = 'No se seleccionó ningún archivo.'
-        return
+const loadFile = ($event) => {
+    if($event.target.files[0].type.indexOf("image") < 0){
+        FILE_AVATAR.value = null;
+        IMAGEN_PREVIZUALIZA.value = null;
+      warning.value = "SOLAMENTE PUEDEN SER ARCHIVOS DE TIPO IMAGEN";
+      return;
     }
-
-    if (!file.type.includes('image')) {
-        FILE_AVATAR.value = null
-        IMAGEN_PREVISUALIZADA.value = null
-        warning.value = 'Solamente pueden ser archivos de tipo imagen.'
-        return
-    }
-
-    FILE_AVATAR.value = file
-    warning.value = ''
-
-    const reader = new FileReader()
-    reader.onloadend = () => {
-        IMAGEN_PREVISUALIZADA.value = reader.result
-    }
-    reader.readAsDataURL(file)
+    warning.value = '';
+    FILE_AVATAR.value = $event.target.files[0];
+    let reader = new FileReader();
+    reader.readAsDataURL(FILE_AVATAR.value);
+    reader.onloadend = () => IMAGEN_PREVIZUALIZA.value = reader.result;
 }
 
 const config = async () => {
     try {
-        const resp = await $api("/veterinaries/config", {
+        const resp = await $api("/veterinaries/config",{
             method: 'GET',
-            onResponseError({ response }) {
+            onResponseError({response}){
                 console.log(response);
                 error_exists.value = response._data.error;
             }
         })
         console.log(resp);
         roles.value = resp.roles;
-        hour_days.value = resp.schedule_hours_groups;
+        hour_days.value  = resp.schedule_hours_groups;
     } catch (error) {
         console.log(error);
     }
 }
-
-const days = ref(['lunes', 'martes', 'miércoles', 'jueves', 'viernes'])
-
-const selectSegmentTimeAll = ($event, segment_times, day) => {
-    if ($event.target.checked) {
+const selectSegmentTimeAll = ($event,segment_times,day) => {
+    if($event.target.checked){
+        // EL CHECKBOX ESTA MARCADO
         segment_times.forEach(segment_time => {
-            SelectedSegmentTime($event, segment_time, day)
-            let INDEX = selected_segment_time.value.findIndex(seg_time => seg_time == segment_time.id + '-' + day);
-            if (INDEX == -1) {
-                selected_segment_time.value.push(segment_time.id + '-' + day);
+            selectedSegmentTime($event,segment_time,day);
+            let INDEX = selected_segment_time.value.findIndex(seg_time => seg_time == segment_time.id+'-'+day);
+            if(INDEX == -1){
+                selected_segment_time.value.push(segment_time.id+'-'+day);
             }
         });
-    } else {
+    }else{
+        // EL CHECKBOX ESTA DESMARCADO
         segment_times.forEach(segment_time => {
-            SelectedSegmentTime($event, segment_time, day)
-            let INDEX = selected_segment_time.value.findIndex(seg_time => seg_time == segment_time.id + '-' + day);
-            if (INDEX != -1) {
-                selected_segment_time.value.splice(INDEX, 1);
+            selectedSegmentTime($event,segment_time,day);
+            let INDEX = selected_segment_time.value.findIndex(seg_time => seg_time == segment_time.id+'-'+day);
+            if(INDEX != -1){
+                selected_segment_time.value.splice(INDEX,1);
             }
         })
     }
 }
-
-const selectSegmentTimeAllGroups = ($event, segment_times) => {
-    if ($event.target.checked) {
+const selectSegmentTimeAllGroups = ($event,segment_times) => {
+    if($event.target.checked){
+        // EL CHECKBOX ESTA MARCADO
         days.value.forEach((day) => {
             segment_times.forEach(segment_time => {
-                SelectedSegmentTime($event, segment_time, day)
-                let INDEX = selected_segment_time.value.findIndex(seg_time => seg_time == segment_time.id + '-' + day);
-                if (INDEX == -1) {
-                    selected_segment_time.value.push(segment_time.id + '-' + day);
+                selectedSegmentTime($event,segment_time,day);
+                let INDEX = selected_segment_time.value.findIndex(seg_time => seg_time == segment_time.id+'-'+day);
+                if(INDEX == -1){
+                    selected_segment_time.value.push(segment_time.id+'-'+day);
                 }
             });
         })
-    } else {
+    }else{
+        // EL CHECKBOX ESTA DESMARCADO
         days.value.forEach((day) => {
             segment_times.forEach(segment_time => {
-                SelectedSegmentTime($event, segment_time, day)
-                let INDEX = selected_segment_time.value.findIndex(seg_time => seg_time == segment_time.id + '-' + day);
-                if (INDEX != -1) {
-                    selected_segment_time.value.splice(INDEX, 1);
+                selectedSegmentTime($event,segment_time,day);
+                let INDEX = selected_segment_time.value.findIndex(seg_time => seg_time == segment_time.id+'-'+day);
+                if(INDEX != -1){
+                    selected_segment_time.value.splice(INDEX,1);
                 }
             })
         })
-
+    }
+}
+const selectedSegmentTime = ($event,segment_time,day) => {
+    if($event.target.checked){
+        // EL CHECKBOX ESTA MARCADO
+            let INDEX = schedule_hour_veterinarie.value.findIndex(seg_time => seg_time.id_seg == segment_time.id+'-'+day);
+            if(INDEX == -1){
+                schedule_hour_veterinarie.value.push({
+                    id_seg:segment_time.id+'-'+day,
+                    segment_time_id: segment_time.id,
+                    day: day,
+                });
+            }
+    }else{
+        // EL CHECKBOX ESTA DESMARCADO
+        let INDEX = schedule_hour_veterinarie.value.findIndex(seg_time => seg_time.id_seg == segment_time.id+'-'+day);
+        if(INDEX != -1){
+            schedule_hour_veterinarie.value.splice(INDEX,1);
+        }
     }
 }
 
-const SelectedSegmentTime = ($event, segment_time, day) => {
-    if ($event.target.checked) {
-        let INDEX = schedule_hours_veterinarie.value.findIndex(seg_time => seg_time.id_seg == segment_time.id + '-' + day);
-        if (INDEX == -1) {
-            schedule_hours_veterinarie.value.push({
-                id_seg: segment_time.id + '-' + day,
-                segment_time_id: segment_time.id,
-                day: day,
-            });
-        }
-
-    } else {
-        let INDEX = schedule_hours_veterinarie.value.findIndex(seg_time => seg_time.id_seg == segment_time.id + '-' + day);
-        if (INDEX != -1) {
-            schedule_hours_veterinarie.value.splice(INDEX, 1);
-        }
-    }
-}
-const validations = [
-    { field: 'name', message: 'Se debe llenar el nombre del veterinario' },
-    { field: 'surname', message: 'Se debe llenar el apellido del veterinario' },
-    { field: 'phone', message: 'Se debe llenar el teléfono del veterinario' },
-    { field: 'gender', message: 'Se debe llenar el género del veterinario' },
-    { field: 'role_id', message: 'Se debe seleccionar un rol para el veterinario' },
-    { field: 'password', message: 'Se debe digitar una contraseña para el veterinario' },
-    { field: 'email', message: 'Se debe llenar el email del veterinario' }
-]
 const fieldsClean = () => {
     form.value = {
         name: null,
         surname: null,
         email: null,
         phone: null,
-        type_document: 'CI',
+        type_document: 'DNI',
         n_document: null,
         birthday: null,
         designation: null,
@@ -157,64 +141,101 @@ const fieldsClean = () => {
         role_id: null,
         password: null,
     }
-    FILE_AVATAR.value = null,
-        IMAGEN_PREVISUALIZADA.value = null,
-        schedule_hours_veterinarie.value = []
-    selected_segment_time.value = []
-
+    FILE_AVATAR.value = null;
+    IMAGEN_PREVIZUALIZA.value = null;
+    schedule_hour_veterinarie.value = [];
+    selected_segment_time.value = [];
 }
-const store = async () => {
-    if (schedule_hours_veterinarie.value.length == 0) {
-        warning.value = 'Debes programar la disponibilidad laboral del veterinario'
-        return
+
+const store = async() => {
+  warning.value = null;
+    if(schedule_hour_veterinarie.value.length == 0){
+        warning.value = "Debes programar la disponibilidad laboral del veterinario";
+        return;
+      }
+      if(!form.value.name){
+        warning.value = "Se debe llenar el nombre del veterinario";
+        return;
+      }
+      if(!form.value.surname){
+        warning.value = "Se debe llenar el apellido del veterinario";
+        return;
+      }
+      if(!form.value.email){
+        warning.value = "Se debe llenar el email del veterinario";
+        return;
+      }
+      if(!form.value.phone){
+        warning.value = "Se debe llenar el telefono del veterinario";
+        return;
+      }
+      if(!form.value.gender){
+        warning.value = "Se debe llenar el genero del veterinario";
+        return;
+      }
+      if(!FILE_AVATAR.value){
+        warning.value = "Se debe seleccionar un avatar para el veterinario";
+        return;
+      }
+      if(!form.value.role_id){
+        warning.value = "Se debe seleccionar un rol para el veterinario";
+        return;
+      }
+      if(!form.value.password){
+        warning.value = "Se debe digitar una contraseña para el veterinario";
+        return;
+      }
+
+    let formData = new FormData();
+
+    formData.append("name",form.value.name);
+    formData.append("surname",form.value.surname);
+    formData.append("email",form.value.email);
+    if(form.value.type_document){
+        formData.append("type_document",form.value.type_document);
     }
-    for (const rule of validations) {
-        if (!form.value[rule.field]) {
-            warning.value = rule.message
-            return
+    if(form.value.n_document){
+        formData.append("n_document",form.value.n_document);
+    }
+    formData.append("phone",form.value.phone);
+    formData.append("gender",form.value.gender);
+    if(form.value.designation){
+        formData.append("designation",form.value.designation);
+    }
+    formData.append("password",form.value.password);
+    formData.append("role_id",form.value.role_id);
+    if(form.value.birthday){
+        formData.append("birthday",form.value.birthday);
+    }
+    formData.append("imagen",FILE_AVATAR.value)
+    formData.append("schedule_hour_veterinarie",JSON.stringify(schedule_hour_veterinarie.value));
+  try {
+    load_request.value = true;
+    const resp =  await $api('/veterinaries',{
+        method: 'POST',
+        body:formData,
+        onResponseError({response}){
+          console.log(response);
+          error_exists.value = response._data.error;
         }
-    }
-
-    if (!FILE_AVATAR.value) {
-        warning.value = 'Se debe seleccionar un avatar para el veterinario'
-        return
-    }
-
-    const formData = new FormData()
-    Object.keys(form.value).forEach(key => {
-        if (form.value[key]) formData.append(key, form.value[key])
     })
-    formData.append('imagen', FILE_AVATAR.value)
-    formData.append('schedule_hours_veterinarie', JSON.stringify(schedule_hours_veterinarie.value))
-
-    try {
-        load_request.value = true;
-        const resp = await $api('/veterinaries', {
-            method: 'POST',
-            body: formData,
-            onResponseError({ response }) {
-                error_exists.value = response._data?.error || 'Error desconocido'
-            }
-        })
-        console.log(resp)
-        load_request.value = true;
-        if (resp?.data?.message === 403) {
-            warning.value = resp.message_text
-        } else {
-            success.value = 'El veterinario se ha creado correctamente'
-            setTimeout(() => {
-                success.value = null
-                warning.value = null
-                error_exists.value = null
-                fieldsClean();
-                // emit('update:isDialogVisible', false)
-                // emit('addUser', resp.user)
-            }, 200)
-        }
-    } catch (error) {
-        console.error(error)
-        error_exists.value = 'Error al conectar con el servidor'
+    console.log(resp);
+    load_request.value = false;
+    if(resp.message == 403){
+      warning.value = resp.message_text;
+    }else{
+      success.value = "El veterinario se ha creado correctamente";
+      setTimeout(() => {
+        success.value = null;
+        warning.value = null;
+        error_exists.value = null;
+        fieldsClean()
+      }, 1500);
     }
+  } catch (error) {
+    console.log(error);
+    error_exists.value = error;
+  }
 }
 onMounted(() => {
     config();
@@ -222,163 +243,200 @@ onMounted(() => {
 
 definePage({
     meta: {
-        Permission: 'register_veterinary'
+        permisssion: 'register_veterinary'
     },
 })
 </script>
 
 <template>
     <div>
-        <VCard class="pa-3 pa-sm-8 rounded-lg" elevation="4">
-            <VCardText>
-                <div class="mb-6 text-center">
-                    <h4 class="text-h4 mb-2">Agregar Veterinario</h4>
-                    <p class="text-subtitle-1 text-muted">Completa los datos requeridos</p>
+        <VCard class="refer-and-earn-dialog pa-3 pa-sm-11">
+            <VCardText class="pa-5">
+                <div class="mb-6">
+                <h4 class="text-h4 text-center mb-2">
+                    Agregar veterinaria 🧑‍⚕️
+                </h4>
                 </div>
-
-                <!-- Datos personales -->
-                <v-divider class="mb-4"></v-divider>
-                <h6 class="text-h6 mb-2">Datos personales</h6>
-                <vRow dense>
-                    <vCol cols="12" md="6">
-                        <VTextField dense outlined label="Nombre" v-model="form.name" placeholder="Ejemplo: Marcos" />
-                    </vCol>
-                    <vCol cols="12" md="6">
-                        <VTextField dense outlined label="Apellido" v-model="form.surname"
-                            placeholder="Ejemplo: Vargas" />
-                    </vCol>
-                    <vCol cols="12" md="4">
-                        <VTextField dense outlined label="Teléfono" type="number" v-model="form.phone"
-                            placeholder="Ejemplo: 60983646" />
-                    </vCol>
-                    <vCol cols="12" md="4">
-                        <VSelect dense outlined :items="type_documents" v-model="form.type_document"
-                            label="Tipo de documento" placeholder="Selecciona" />
-                    </vCol>
-                    <vCol cols="12" md="4">
-                        <VTextField dense outlined label="N° de documento" type="number" v-model="form.n_document"
-                            placeholder="Ejemplo: 9729185" />
-                    </vCol>
-                </vRow>
-
-                <!-- Más información -->
-                <v-divider class="my-4"></v-divider>
-                <h6 class="text-h6 mb-2">Más información</h6>
-                <vRow dense>
-                    <vCol cols="12" md="6">
-                        <AppDateTimePicker dense outlined v-model="form.birthday" label="Fecha de nacimiento"
-                            placeholder="Selecciona fecha" />
-                    </vCol>
-                    <vCol cols="12" md="6" class="d-flex align-center">
-                        <VRadioGroup v-model="form.gender" inline>
-                            <VRadio label="Masculino" value="M" />
-                            <VRadio label="Femenino" value="F" />
+    
+                <VRow>
+                    <VCol cols="6">
+                        <VTextField
+                        label="Nombre:"
+                        v-model="form.name"
+                        placeholder="Example: Rafael"
+                        />
+                    </VCol>
+                    <VCol cols="6">
+                        <VTextField
+                        label="Apellido:"
+                        v-model="form.surname"
+                        placeholder="Example: Mendoza"
+                        />
+                    </VCol>
+    
+                    <VCol cols="4">
+                        <VTextField
+                        label="Telefono:"
+                        type="number"
+                        v-model="form.phone"
+                        placeholder="Example: 99999999"
+                        />
+                    </VCol>
+                    <VCol cols="4">
+                        <VSelect
+                            :items="type_documents"
+                            v-model="form.type_document"
+                            label="Tipo de documento"
+                            placeholder="Select Item"
+                            eager
+                        />
+                    </VCol>
+                    <VCol cols="4">
+                        <VTextField
+                        label="N° de documento:"
+                        type="number"
+                        v-model="form.n_document"
+                        placeholder="Example: Mendoza"
+                        />
+                    </VCol>
+    
+                    <VCol cols="4">
+                        <AppDateTimePicker
+                            v-model="form.birthday"
+                            label="Cumpleaños"
+                            placeholder="Select date"
+                        />
+                    </VCol>
+                    <VCol cols="4">
+                        <VRadioGroup
+                            v-model="form.gender"
+                            inline
+                        >
+                            <VRadio
+                            label="Masculino"
+                            value="M"
+                            />
+                            <VRadio
+                            label="Femenino"
+                            value="F"
+                            />
                         </VRadioGroup>
-                    </vCol>
-                    <vCol cols="12">
-                        <VTextarea dense outlined label="Designación" placeholder="Texto" v-model="form.designation" />
-                    </vCol>
-                </vRow>
-
-                <!-- Acceso -->
-                <v-divider class="my-4"></v-divider>
-                <h6 class="text-h6 mb-2">Datos de acceso</h6>
-                <vRow dense>
-                    <vCol cols="12" md="6">
-                        <VTextField dense outlined v-model="form.email" label="Email" type="email"
-                            placeholder="johndoe@email.com" />
-                    </vCol>
-                    <vCol cols="12" md="6">
-                        <VTextField dense outlined v-model="form.password" label="Password" placeholder="············"
-                            :type="isPasswordVisible ? 'text' : 'password'"
-                            :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
-                            @click:append-inner="isPasswordVisible = !isPasswordVisible" />
-                    </vCol>
-                </vRow>
-
-                <!-- Archivo -->
-                <v-divider class="my-4"></v-divider>
-                <h6 class="text-h6 mb-2">Archivo</h6>
-                <vRow dense>
-                    <vCol cols="12">
-                        <vRow>
-                            <vCol cols="6">
-                                <VFileInput dense outlined label="Selecciona archivo" @change="loadFile($event)" />
-                            </vCol>
-                            <vCol cols="6">
-                                <VSelect :items="roles" v-model="form.role_id" label="Rol" item-title="name"
-                                    item-value="id" placeholder="Selecciopna el rol" eager />
-                            </vCol>
-                        </vRow>
-                    </vCol>
-                    <vCol cols="12" v-if="IMAGEN_PREVISUALIZADA">
-                        <VImg width="137" height="176" :src="IMAGEN_PREVISUALIZADA"
-                            class="mt-4 mx-auto rounded elevation-3" />
-                    </vCol>
-                </vRow>
-                <!-- Botón -->
-                <div class="text-center mt-6">
-                    <VBtn color="primary" class="px-8 text-subtitle-1" elevation="2" @click="store">
-                        Crear veterinario
-                    </VBtn>
-                </div>
-
-                <!-- Alertas -->
+                    </VCol>
+                    <VCol cols="4">
+                        <VTextarea
+                            v-model="form.designation"
+                            label="Designación"
+                            placeholder="Text"
+                        />
+                    </VCol>
+                    <VCol cols="6">
+                        <VRow>
+                            <VCol cols="12">
+                                <VFileInput label="File input" @change="loadFile($event)" />
+                            </VCol>
+                            <VCol cols="12" v-if="IMAGEN_PREVIZUALIZA">
+                                <VImg
+                                width="137"
+                                height="176"
+                                :src="IMAGEN_PREVIZUALIZA"
+                                />
+                            </VCol>
+                        </VRow>
+                    </VCol>
+                    <VCol cols="6">
+                        <VSelect
+                            :items="roles"
+                            v-model="form.role_id"
+                            label="Rol"
+                            item-title="name"
+                            item-value="id"
+                            placeholder="Select Rol"
+                            eager
+                        />
+                    </VCol>
+                    <VCol cols="6">
+                        <VTextField
+                        v-model="form.email"
+                        label="Email"
+                        type="email"
+                        placeholder="johndoe@email.com"
+                        />
+                    </VCol>
+                    <VCol cols="6">
+                        <VTextField
+                        v-model="form.password"
+                        label="Password"
+                        placeholder="············"
+                        :type="isPasswordVisible ? 'text' : 'password'"
+                        :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
+                        @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                        />
+                    </VCol>
+                </VRow>
+    
                 <VAlert type="warning" class="mt-3" v-if="warning">
-                    <strong>{{ warning }}</strong>
+                <strong>{{ warning }}</strong>
                 </VAlert>
                 <VAlert type="error" class="mt-3" v-if="error_exists">
-                    <strong>{{ error_exists }}</strong>
+                <strong>En el servidor hubo un error al guardar</strong>
                 </VAlert>
                 <VAlert type="success" class="mt-3" v-if="success">
-                    <strong>{{ success }}</strong>
+                <strong>{{ success }}</strong>
                 </VAlert>
-
             </VCardText>
-            <VCardText class="pa-4">
-                <div class="text-h6 font-weight-medium mb-4">
-                    <!-- {{ schedule_hours_veterinarie }}
-                    {{ selected_segment_time }} -->
+            <VCardText class="pa-5 py-0">
+                <VBtn color="primary" class="mb-4" @click="store()">
+                Crear
+                </VBtn>
+            </VCardText>
 
-                </div>
-
-                <VTable class="elevation-1 rounded-lg">
+            <VCardText class="pa-5">
+                {{ selected_segment_time }}
+                <VTable>
                     <thead>
-                        <tr>
-                            <th class="text-center text-uppercase font-weight-bold py-3" style="min-width: 100px">
-                                Días / Horas
-                            </th>
-                            <th v-for="(day, index) in days" :key="'head-' + index"
-                                class="text-center text-uppercase font-weight-bold py-3">
-                                {{ day }}
-                            </th>
-                        </tr>
+                    <tr>
+                        <th class="text-uppercase">
+                            DIAS/HORAS
+                        </th>
+
+                        <th class="text-uppercase" v-for="(day, index) in days" :key="index">
+                            {{ day }}
+                        </th>
+                    </tr>
                     </thead>
-
+    
                     <tbody>
-                        <tr v-for="(item, rowIndex) in hour_days" :key="'row-' + rowIndex">
-                            <!-- Columna de la hora -->
-                            <td class="text-center align-top px-3 py-2">
-                                <div class="font-weight-medium mb-2">{{ item.hour_format }}</div>
-                                <VCheckbox class="mt-2 ml-7" density="compact" hide-details label="Todos"
-                                    @click="selectSegmentTimeAllGroups($event, item.segments_time)"
-                                    v-if="!load_request" />
+                        <tr
+                            v-for="item in hour_days"
+                            :key="item.hour"
+                        >
+                            <td>
+                            {{ item.hour_format }}
+                                <VCheckbox
+                                        @click="selectSegmentTimeAllGroups($event,item.segments_time)"
+                                        label="Todos"
+                                        v-if="!load_request"
+                                    />
                             </td>
-
-                            <!-- Columnas por día -->
-                            <td v-for="(day, colIndex) in days" :key="'col-' + colIndex" class="align-top px-2 py-3">
-                                <div class="d-flex flex-column align-center">
-                                    <VCheckbox class="mb-2" density="compact" hide-details label="Todos"
-                                        @click="selectSegmentTimeAll($event, item.segments_time, day)"
-                                        v-if="!load_request" />
+                            
+                            <td v-for="(day, index) in days" :key="index">
+                                <div class="demo-space-x my-2">
+                                    <VCheckbox
+                                        @click="selectSegmentTimeAll($event,item.segments_time,day)"
+                                        label="Todos"
+                                        v-if="!load_request"
+                                    />
                                     <template v-for="(segment_time, index) in item.segments_time" :key="index">
-                                        <VCheckbox @click="SelectedSegmentTime($event, segment_time, day)"
-                                            v-model="selected_segment_time"
-                                            :label="segment_time.hour_start_format + ' ' + segment_time.hour_end_format"
-                                            :value="segment_time.id + '-' + day" />
+                                        <VCheckbox
+                                        @click="selectedSegmentTime($event,segment_time,day)"
+                                        v-model="selected_segment_time"
+                                        :label="segment_time.hour_start_format+' '+segment_time.hour_end_format"
+                                        :value="segment_time.id+'-'+day"
+                                        />
                                     </template>
                                 </div>
                             </td>
+
                         </tr>
                     </tbody>
                 </VTable>
@@ -391,7 +449,6 @@ definePage({
 .v-selection-control .v-label {
     font-size: small;
 }
-
 .v-checkbox.v-input {
     margin: 0;
 }

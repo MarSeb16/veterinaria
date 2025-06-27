@@ -3,24 +3,25 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-
-use App\Models\Veterinarie\VeterinarieScheduleDay;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Veterinarie\VeterinarieScheduleDay;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, Notifiable, HasRoles, SoftDeletes;
-
+    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasFactory, Notifiable;
+    use HasRoles;
+    use SoftDeletes;
     /**
      * The attributes that are mass assignable.
      *
-     * @var array&lt;int, string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'name',
@@ -29,18 +30,18 @@ class User extends Authenticatable implements JWTSubject
         'surname',
         'role_id',
         'avatar',
-        'type_document',
-        'n_document',
-        'phone',
-        'designation',
-        'birthday',
-        'gender'
+        "type_document",
+        "n_document",
+        "phone",
+        "designation",
+        "birthday",
+        "gender",
     ];
 
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array&lt;int, string>
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -50,7 +51,7 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Get the attributes that should be cast.
      *
-     * @return array&lt;string, string>
+     * @return array<string, string>
      */
     protected function casts(): array
     {
@@ -69,7 +70,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->getKey();
     }
-
+ 
     /**
      * Return a key value array, containing any custom claims to be added to the JWT.
      *
@@ -79,12 +80,12 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
-    public function role()
-    {
-        return $this->belongsTo(Role::class, "role_id");
+
+    public function role(){
+        return $this->belongsTo(Role::class,"role_id");
     }
-    public function schedule_days()
-    {
-        return $this->hasMany(VeterinarieScheduleDay::class, "veterinarie_id");
+
+    public function schedule_days(){
+        return $this->hasMany(VeterinarieScheduleDay::class,"veterinarie_id");
     }
 }

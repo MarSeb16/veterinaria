@@ -12,7 +12,7 @@ export const useCalendarStore = defineStore('calendar', {
       },
       {
         color: 'warning',
-        label: 'Vaccinations',
+        label: 'Vaccination',
       },
       {
         color: 'success',
@@ -23,15 +23,16 @@ export const useCalendarStore = defineStore('calendar', {
         label: 'ETC',
       },
     ],
-    selectedCalendars: ['Personal', 'Appointment', 'Vaccinations', 'Surgeries', 'ETC'],
+    selectedCalendars: ['Personal', 'Appointment', 'Vaccination', 'Surgeries', 'ETC'],
   }),
   actions: {
     async fetchEvents() {
       const { data, error } = await useApi(createUrl('/medical-records/calendar'))
+
       if (error.value)
         return error.value
       console.log(data);
-      return data.value.calendars.data
+      return data.value.calendars.data;
     },
     async addEvent(event) {
       await $api('/apps/calendar', {

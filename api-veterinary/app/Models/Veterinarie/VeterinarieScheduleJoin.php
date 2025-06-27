@@ -2,25 +2,34 @@
 
 namespace App\Models\Veterinarie;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class VeterinarieScheduleJoin extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         "veterinarie_schedule_day_id",
         "veterinarie_schedule_hour_id"
     ];
-
-    public function veterinarie_schedule_day()
+    public function setCreatedAtAttribute($value)
     {
-        return $this->belongsTo(VeterinarieScheduleDay::class, "veterinarie_schedule_day_id");
+    	date_default_timezone_set('America/Lima');
+        $this->attributes["created_at"]= Carbon::now();
     }
 
-    public function veterinarie_schedule_hour()
+    public function setUpdatedAtAttribute($value)
     {
-        return $this->belongsTo(VeterinarieScheduleHour::class, "veterinarie_schedule_hour_id");
+    	date_default_timezone_set("America/Lima");
+        $this->attributes["updated_at"]= Carbon::now();
+    }
+
+    public function veterinarie_schedule_day() {
+        return $this->belongsTo(VeterinarieScheduleDay::class,"veterinarie_schedule_day_id");
+    }
+    
+    public function veterinarie_schedule_hour() {
+        return $this->belongsTo(VeterinarieScheduleHour::class,"veterinarie_schedule_hour_id");
     }
 }

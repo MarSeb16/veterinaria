@@ -11,19 +11,18 @@ export const useApi = createFetch({
   options: {
     refetch: true,
     async beforeFetch({ options }) {
-      const accessToken = localStorage.getItem("token"); //useCookie('accessToken').value
+      const accessToken = localStorage.getItem("token");//useCookie('accessToken').value
       if (accessToken) {
         options.headers = {
           ...options.headers,
           Authorization: `Bearer ${accessToken}`,
         }
       }
-
+      
       return { options }
     },
     afterFetch(ctx) {
       const { data, response } = ctx
-
       // Parse data if it's JSON
       let parsedData = null
       try {
@@ -32,7 +31,7 @@ export const useApi = createFetch({
       catch (error) {
         console.error(error)
       }
-
+      
       return { data: parsedData, response }
     },
   },

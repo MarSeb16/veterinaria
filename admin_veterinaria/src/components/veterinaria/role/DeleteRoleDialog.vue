@@ -1,88 +1,101 @@
 <script setup>
-import { onMounted, ref } from 'vue'
 
 const props = defineProps({
-    isDialogVisible: { type: Boolean, required: true },
-    rolSelected: { type: Object, required: true }
+  isDialogVisible: {
+    type: Boolean,
+    required: true,
+  },
+  rolSelected: {
+    type: Object,
+    required: true,
+  }
 })
 
-const emit = defineEmits(['update:isDialogVisible', 'deleteRole'])
+const emit = defineEmits(['update:isDialogVisible','addRole'])
 
 const dialogVisibleUpdate = val => {
-    emit('update:isDialogVisible', val)
+  emit('update:isDialogVisible', val)
 }
 
-const success = ref(null)
-const error_exists = ref(null)
-const role_selected = ref(null)
+const warning = ref(null);
+const success = ref(null);
+const error_exists = ref(null);
+const role_selected = ref(null);
 
-const deleted = async () => {
-    try {
-        const resp = await $api('/role/' + role_selected.value.id, {
-            method: 'DELETE',
-            onResponseError({ response }) {
-                console.log(response)
-                error_exists.value = response._data?.error ?? 'Error desconocido'
-            },
-        })
-        console.log(resp)
-        success.value = 'El rol se ha eliminado correctamente.'
-        emit('deleteRole', true)
-
-        setTimeout(() => {
-            success.value = null
-            emit('update:isDialogVisible', false)
-        }, 500)
-    } catch (error) {
-        console.error(error)
-        error_exists.value = '❌ Error al eliminar el rol. Intente nuevamente.'
-    }
+const deleted = async() => {
+  try {
+    const resp =  await $api('/role/'+role_selected.value.id,{
+        method: 'DELETE',
+        onResponseError({response}){
+          console.log(response);
+          error_exists.value = response._data.error;
+        }
+    })
+    console.log(resp);
+    success.value = "El rol se ha eliminado correctamente";
+    emit('addRole', true)
+    emit('update:isDialogVisible', false)
+  } catch (error) {
+    console.log(error);
+    error_exists.value = error;
+  }
 }
-
 
 onMounted(() => {
-    role_selected.value = props.rolSelected
+  role_selected.value = props.rolSelected;
+  console.log(role_selected.value);
 })
 </script>
 
 <template>
-    <VDialog :model-value="props.isDialogVisible" max-width="500" @update:model-value="dialogVisibleUpdate">
-        <VCard class="pa-6 rounded-xl">
+  <VDialog
+    :model-value="props.isDialogVisible"
+    max-width="750"
+    @update:model-value="dialogVisibleUpdate"
+  >
+    <VCard class="refer-and-earn-dialog pa-3 pa-sm-11">
+      <!-- 👉 dialog close btn -->
+      <DialogCloseBtn
+        variant="text"
+        size="default"
+        @click="emit('update:isDialogVisible', false)"
+      />
 
-            <!-- Botón de cierre -->
-            <DialogCloseBtn variant="text" size="default" class="float-right"
-                @click="emit('update:isDialogVisible', false)" />
+      <VCardText class="pa-5">
+        <div class="mb-6">
+          <h4 class="text-h4 text-center mb-2" v-if="role_selected">
+            Deleted Role : {{ role_selected.id }}
+          </h4>
+          <!-- <p class="text-sm-body-1 text-center">
+            Supported payment methods
+          </p> -->
+        </div>
+        <p v-if="role_selected">¿Estas seguro de eliminar el ROL "{{ role_selected.name }}"?</p>
+        <VAlert type="error" class="mt-3" v-if="error_exists">
+          <strong>En el servidor hubo un error al guardar</strong>
+        </VAlert>
+        <VAlert type="warning" class="mt-3" v-if="success">
+          <strong>{{ success }}</strong>
+        </VAlert>
+      </VCardText>
+      <VCardText class="pa-5">
+        <VBtn color="error" class="mb-4" @click="deleted()">
+          Eliminar
+        </VBtn>
+      </VCardText>
 
-            <!-- Título -->
-            <div class="text-center mb-4">
-                <h4 class="text-h5 font-weight-bold">Eliminar Rol</h4>
-                <p class="text-subtitle-1">¿Estás seguro de que deseas eliminar el rol <strong>{{ role_selected?.name
-                }}</strong>?</p>
-            </div>
-
-            <!-- Mensajes -->
-            <div class="mt-4 text-center">
-                <VAlert type="error" v-if="error_exists" class="mb-3">
-                    <strong>{{ error_exists }}</strong>
-                </VAlert>
-                <VAlert type="success" v-if="success" class="mb-3">
-                    <strong>{{ success }}</strong>
-                </VAlert>
-            </div>
-
-            <!-- Botón eliminar -->
-            <div class="d-flex justify-center mt-5">
-                <VBtn color="error" @click="deleted" class="px-6 py-2">
-                    Eliminar
-                </VBtn>
-            </div>
-
-        </VCard>
-    </VDialog>
+    </VCard>
+  </VDialog>
 </template>
 
-<style lang="scss" scoped>
-.v-card {
-    text-align: center;
+<style lang="scss">
+.refer-link-input {
+  .v-field--appended {
+    padding-inline-end: 0;
+  }
+
+  .v-field__append-inner {
+    padding-block-start: 0.125rem;
+  }
 }
 </style>

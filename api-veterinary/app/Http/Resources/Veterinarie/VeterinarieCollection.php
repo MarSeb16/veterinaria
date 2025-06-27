@@ -15,7 +15,7 @@ class VeterinarieCollection extends ResourceCollection
     public function toArray(Request $request): array
     {
         return [
-            "data" => VeterinarieResource::collection($this->collection)
+            "data" => VeterinarieResource::collection($this->collection),
         ];
     }
 }

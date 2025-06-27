@@ -14,8 +14,7 @@ import {
 
 import { filterInputAttrs } from 'vuetify/lib/util/helpers'
 import { useConfigStore } from '@core/stores/config'
-import { Spanish } from 'flatpickr/dist/l10n/es.js';
-
+import { Spanish } from "flatpickr/dist/l10n/es";
 
 const props = defineProps({
   autofocus: Boolean,
@@ -77,23 +76,9 @@ if (compAttrs.config && compAttrs.config.inline) {
   isInlinePicker.value = compAttrs.config.inline
   Object.assign(compAttrs, { altInputClass: 'inlinePicker' })
 }
-
-//para inputdate en español pero sin año ese es el problema
-// if (!compAttrs.config) {
-//   compAttrs.config = {
-//     locale: Spanish,
-//     altInput: true,
-//     altFormat: "d/m/Y",
-//     dateFormat: "Y-m-d",
-//     defaultDate: new Date(),
-//     wrap: false,
-//     allowInput: true,
-//     static: true,
-//     minDate: "1950-01-01",
-//     maxDate: "2050-12-31",
-//   };
-// }
-
+if(!compAttrs.config){// || (compAttrs.config && !compAttrs.config.enableTime)
+  compAttrs.config = {locale: Spanish};
+}
 compAttrs.config = {
   ...compAttrs.config,
   prevArrow: '<i class="ri-arrow-left-s-line v-icon" style="font-size: 22px; height: 22px; width: 22px;"></i>',
@@ -118,9 +103,9 @@ const updateThemeClassInCalendar = () => {
   if (!refFlatPicker.value.fp.calendarContainer)
     return
   vuetifyThemesName.forEach(t => {
-    refFlatPicker.value.fp.calendarContainer.classList.remove(`v-theme--${t}`)
+    refFlatPicker.value.fp.calendarContainer.classList.remove(`v-theme--${ t }`)
   })
-  refFlatPicker.value.fp.calendarContainer.classList.add(`v-theme--${vuetifyTheme.global.name.value}`)
+  refFlatPicker.value.fp.calendarContainer.classList.add(`v-theme--${ vuetifyTheme.global.name.value }`)
 }
 
 watch(() => configStore.theme, updateThemeClassInCalendar)
@@ -135,28 +120,57 @@ const emitModelValue = val => {
 
 <template>
   <div class="app-picker-field">
-    <VInput v-bind="{ ...inputProps, ...rootAttrs }" :model-value="modelValue" :hide-details="props.hideDetails" :class="[{
-      'v-text-field--prefixed': props.prefix,
-      'v-text-field--suffixed': props.suffix,
-      'v-text-field--flush-details': ['plain', 'underlined'].includes(props.variant),
-    }, props.class]" class="position-relative v-text-field" :style="props.style">
+    <VInput
+      v-bind="{ ...inputProps, ...rootAttrs }"
+      :model-value="modelValue"
+      :hide-details="props.hideDetails"
+      :class="[{
+        'v-text-field--prefixed': props.prefix,
+        'v-text-field--suffixed': props.suffix,
+        'v-text-field--flush-details': ['plain', 'underlined'].includes(props.variant),
+      }, props.class]"
+      class="position-relative v-text-field"
+      :style="props.style"
+    >
       <template #default="{ id, isDirty, isValid, isDisabled, isReadonly }">
         <!-- v-field -->
-        <VField v-bind="{ ...fieldProps }" :id="id.value" role="textbox"
-          :active="focused || isDirty.value || isCalendarOpen" :focused="focused || isCalendarOpen"
-          :dirty="isDirty.value || props.dirty" :error="isValid.value === false" :disabled="isDisabled.value"
-          @click:clear="onClear">
+        <VField
+          v-bind="{ ...fieldProps }"
+          :id="id.value"
+          role="textbox"
+          :active="focused || isDirty.value || isCalendarOpen"
+          :focused="focused || isCalendarOpen"
+          :dirty="isDirty.value || props.dirty"
+          :error="isValid.value === false"
+          :disabled="isDisabled.value"
+          @click:clear="onClear"
+        >
           <template #default="{ props: vFieldProps }">
             <div v-bind="vFieldProps">
               <!-- flat-picker  -->
-              <FlatPickr v-if="!isInlinePicker" v-bind="compAttrs" ref="refFlatPicker" :model-value="modelValue"
-                :placeholder="props.placeholder" :readonly="isReadonly.value" class="flat-picker-custom-style"
-                :disabled="isReadonly.value" @on-open="isCalendarOpen = true" @on-close="isCalendarOpen = false"
-                @update:model-value="emitModelValue" />
+              <FlatPickr
+                v-if="!isInlinePicker"
+                v-bind="compAttrs"
+                ref="refFlatPicker"
+                :model-value="modelValue"
+                :placeholder="props.placeholder"
+                :readonly="isReadonly.value"
+                class="flat-picker-custom-style"
+                :disabled="isReadonly.value"
+                @on-open="isCalendarOpen = true"
+                @on-close="isCalendarOpen = false"
+                @update:model-value="emitModelValue"
+              />
 
               <!-- simple input for inline prop -->
-              <input v-if="isInlinePicker" :value="modelValue" :placeholder="props.placeholder"
-                :readonly="isReadonly.value" class="flat-picker-custom-style" type="text">
+              <input
+                v-if="isInlinePicker"
+                :value="modelValue"
+                :placeholder="props.placeholder"
+                :readonly="isReadonly.value"
+                class="flat-picker-custom-style"
+                type="text"
+              >
             </div>
           </template>
         </VField>
@@ -164,8 +178,15 @@ const emitModelValue = val => {
     </VInput>
 
     <!-- flat picker for inline props -->
-    <FlatPickr v-if="isInlinePicker" v-bind="compAttrs" ref="refFlatPicker" :model-value="modelValue"
-      @update:model-value="emitModelValue" @on-open="isCalendarOpen = true" @on-close="isCalendarOpen = false" />
+    <FlatPickr
+      v-if="isInlinePicker"
+      v-bind="compAttrs"
+      ref="refFlatPicker"
+      :model-value="modelValue"
+      @update:model-value="emitModelValue"
+      @on-open="isCalendarOpen = true"
+      @on-close="isCalendarOpen = false"
+    />
   </div>
 </template>
 
@@ -235,7 +256,6 @@ input[altinputclass="inlinePicker"] {
     color: $heading-color;
 
     &.today {
-
       &,
       &:hover {
         border-color: transparent;
@@ -282,15 +302,15 @@ input[altinputclass="inlinePicker"] {
       color: rgb(var(--v-theme-on-primary));
     }
 
-    &.selected.startRange+.endRange:not(:nth-child(7n + 1)),
-    &.startRange.startRange+.endRange:not(:nth-child(7n + 1)),
-    &.endRange.startRange+.endRange:not(:nth-child(7n + 1)) {
+    &.selected.startRange + .endRange:not(:nth-child(7n + 1)),
+    &.startRange.startRange + .endRange:not(:nth-child(7n + 1)),
+    &.endRange.startRange + .endRange:not(:nth-child(7n + 1)) {
       box-shadow: -10px 0 0 rgb(var(--v-theme-primary));
     }
 
     &.flatpickr-disabled,
-    &.prevMonthDay:not(.startRange, .inRange),
-    &.nextMonthDay:not(.endRange, .inRange) {
+    &.prevMonthDay:not(.startRange,.inRange),
+    &.nextMonthDay:not(.endRange,.inRange) {
       color: rgba(var(--v-theme-on-background), var(--v-disabled-opacity));
     }
 
@@ -406,7 +426,7 @@ input[altinputclass="inlinePicker"] {
 
 //  Added bg color for flatpickr input only as it has default readonly attribute
 .flatpickr-input[readonly],
-.flatpickr-input~.form-control[readonly],
+.flatpickr-input ~ .form-control[readonly],
 .flatpickr-human-friendly[readonly] {
   background-color: inherit;
 }

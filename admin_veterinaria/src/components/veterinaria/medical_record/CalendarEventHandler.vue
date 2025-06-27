@@ -34,7 +34,6 @@ const refForm = ref()
 // 👉 Event
 const event = ref(JSON.parse(JSON.stringify(props.event)))
 const state = ref(1);
-
 const resetEvent = () => {
   event.value = JSON.parse(JSON.stringify(props.event))
   nextTick(() => {
@@ -42,8 +41,8 @@ const resetEvent = () => {
   })
 }
 
-watch(event, (new_event) => {
-  state.value = new_event.extendedProps.state
+watch(event,(new_event) => {
+  state.value = new_event.extendedProps.state;
 })
 watch(() => props.isDrawerOpen, resetEvent)
 
@@ -114,18 +113,18 @@ const onCancel = () => {
 const startDateTimePickerConfig = computed(() => {
   const config = {
     enableTime: !event.value.allDay,
-    dateFormat: `Y-m-d${event.value.allDay ? '' : ' H:i'}`,
+    dateFormat: `Y-m-d${ event.value.allDay ? '' : ' H:i' }`,
   }
 
   if (event.value.end)
     config.maxDate = event.value.end
-
+  
   return config
 })
 
 const endDateTimePickerConfig = computed(() => ({
   enableTime: !event.value.allDay,
-  dateFormat: `Y-m-d${event.value.allDay ? '' : ' H:i'}`,
+  dateFormat: `Y-m-d${ event.value.allDay ? '' : ' H:i' }`,
   minDate: event.value.start || undefined,
 }))
 
@@ -135,13 +134,27 @@ const dialogModelValueUpdate = val => {
 </script>
 
 <template>
-  <VNavigationDrawer temporary location="end" :model-value="props.isDrawerOpen" width="420" class="scrollable-content"
-    border="none" @update:model-value="dialogModelValueUpdate">
+  <VNavigationDrawer
+    temporary
+    location="end"
+    :model-value="props.isDrawerOpen"
+    width="420"
+    class="scrollable-content"
+    border="none"
+    @update:model-value="dialogModelValueUpdate"
+  >
     <!-- 👉 Header -->
-    <AppDrawerHeaderSection :title="event.id ? 'Update Appointment' : 'Add Event'"
-      @cancel="$emit('update:isDrawerOpen', false)">
+    <AppDrawerHeaderSection
+      :title="event.id ? 'Update Appointment' : 'Add Event'"
+      @cancel="$emit('update:isDrawerOpen', false)"
+    >
       <template #beforeClose>
-        <IconBtn v-show="event.id" size="large" class="text-medium-emphasis" @click="removeEvent">
+        <IconBtn
+          v-show="event.id"
+          size="large"
+          class="text-medium-emphasis"
+          @click="removeEvent"
+        >
           <VIcon icon="ri-delete-bin-7-line" />
         </IconBtn>
       </template>
@@ -153,62 +166,115 @@ const dialogModelValueUpdate = val => {
       <VCard flat>
         <VCardText>
           <!-- SECTION Form -->
-          <VForm ref="refForm" @submit.prevent="handleSubmit">
+          <VForm
+            ref="refForm"
+            @submit.prevent="handleSubmit"
+          >
             <VRow>
               <!-- 👉 Title -->
               <VCol cols="12">
-                <VTextField v-model="event.extendedProps.pet.name" label="Mascota" placeholder=""
-                  :rules="[requiredValidator]" />
+                <VTextField
+                  v-model="event.extendedProps.pet.name"
+                  label="Mascota"
+                  placeholder=""
+                  :rules="[requiredValidator]"
+                />
               </VCol>
 
               <VCol cols="12">
-                <VTextField v-model="event.extendedProps.veterinarie.full_name" label="Veterinario" placeholder="" />
+                <VTextField
+                  v-model="event.extendedProps.veterinarie.full_name"
+                  label="Veterinario"
+                  placeholder="Meeting room"
+                />
               </VCol>
 
               <!-- 👉 Start date -->
               <VCol cols="12">
-                <AppDateTimePicker :key="JSON.stringify(startDateTimePickerConfig)" v-model="event.start"
-                  :rules="[requiredValidator]" label="Hora de atencion" placeholder="Select Date"
-                  :config="startDateTimePickerConfig" />
+                <AppDateTimePicker
+                  :key="JSON.stringify(startDateTimePickerConfig)"
+                  v-model="event.start"
+                  :rules="[requiredValidator]"
+                  label="Hora de atención"
+                  placeholder="Select Date"
+                  :config="startDateTimePickerConfig"
+                />
               </VCol>
-
               <VCol cols="6">
-                <VTextField v-model="event.extendedProps.day" label="Dia" placeholder="" />
+                <VTextField
+                  v-model="event.extendedProps.day"
+                  label="Dia"
+                  placeholder=""
+                />
               </VCol>
               <VCol cols="6">
-                <VTextField v-model="event.extendedProps.amount" label="Costo de la cita" placeholder="" />
+                <VTextField
+                  v-model="event.extendedProps.amount"
+                  label="Costo de la cita"
+                  placeholder=""
+                />
+              </VCol>
+              <VCol cols="12">
+                <VSelect
+                    :items="[
+                        {
+                            name: 'Pendiente',
+                            id: 1,
+                        },
+                        {
+                            name: 'Cancelado',
+                            id: 2,
+                        },
+                        {
+                            name: 'Atendido',
+                            id: 3,
+                        }
+                    ]"
+                    v-model="event.extendedProps.state"
+                     :disabled="state == 2 || state == 3 ? true : false"
+                    label="Estado de la cita"
+                    item-title="name"
+                    item-value="id"
+                    placeholder="Select Estado"
+                    eager
+                />
               </VCol>
 
               <VCol cols="12">
-                <VSelect v-model="event.extendedProps.state" :items="[
-                  { name: 'Pendiente', id: 1 },
-                  { name: 'Cancelado', id: 2 },
-                  { name: 'Atendido', id: 3 }
-                ]" item-title="name" item-value="id" label="Estado de la cita" dense clearable
-                  :disabled="state == 2 || state == 3 ? true : false" />
+                <VTextarea
+                  v-model="event.extendedProps.description"
+                  label="Razon:"
+                  placeholder="Razon de la cita medica"
+                />
               </VCol>
 
               <VCol cols="12">
-                <VTextarea v-model="event.extendedProps.description" label="Razon"
-                  placeholder="Razon de la cita medica" />
-              </VCol>
-
-              <VCol cols="12">
-                <VTextarea v-model="event.extendedProps.notes" label="Nota" placeholder="Nota de la cita medica" />
+                <VTextarea
+                  v-model="event.extendedProps.notes"
+                  label="Nota:"
+                  placeholder="Razon de la cita medica"
+                />
               </VCol>
 
               <!-- 👉 Form buttons -->
               <VCol cols="12">
-                <VBtn type="submit" class="me-3">
+                <VBtn
+                  type="submit"
+                  class="me-3"
+                >
                   Submit
                 </VBtn>
-                <VBtn variant="outlined" color="secondary" @click="onCancel">
+                <VBtn
+                  variant="outlined"
+                  color="secondary"
+                  @click="onCancel"
+                >
                   Cancel
                 </VBtn>
               </VCol>
             </VRow>
           </VForm>
-          <!-- !SECTION -->
+        <!-- !SECTION -->
         </VCardText>
       </VCard>
     </PerfectScrollbar>

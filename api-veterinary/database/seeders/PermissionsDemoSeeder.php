@@ -11,6 +11,8 @@ class PermissionsDemoSeeder extends Seeder
 {
     /**
      * Create the initial roles and permissions.
+     *
+     * @return void
      */
     public function run()
     {
@@ -69,11 +71,10 @@ class PermissionsDemoSeeder extends Seeder
         // gets all permissions via Gate::before rule; see AuthServiceProvider
 
         $user = \App\Models\User::factory()->create([
-            'name' => 'Marcos Sebastian ',
+            'name' => 'Laravest Code',
             'email' => 'laravest@gmail.com',
             'password' => bcrypt('12345678')
         ]);
         $user->assignRole($role3);
     }
 }
- 

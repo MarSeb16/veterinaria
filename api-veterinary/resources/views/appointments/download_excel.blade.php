@@ -1,44 +1,101 @@
-<table border="1" cellpadding="5" cellspacing="0"
-    style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 12px;">
-    <thead style="background-color: #f2f2f2;">
+<table>
+    <thead>
         <tr>
             <th>#</th>
-            <th>Mascota</th>
-            <th>Especie</th>
-            <th>Veterinario</th>
-            <th>Fecha de la cita</th>
-            <th>Estado de la cita</th>
-            <th>Estado de pago</th>
-            <th>Horario</th>
+            <th width="40">Mascota</th>
+            <th width="25">Especie</th>
+            <th width="40">Veterinario</th>
+            <th width="25">Fecha de la cita</th>
+            <th width="25">Estado de la cita</th>
+            <th width="25">Estado de pago</th>
+            <th width="40">Horario</th>
         </tr>
     </thead>
     <tbody>
-        @foreach ($appointments as $key => $appointment)
+
+        @foreach ($appointments as $key=>$appointment)
             <tr>
-                <td>{{ $key + 1 }}</td>
-                <td>{{ $appointment->pet->name }}</td>
-                <td>{{ $appointment->pet->specie }}</td>
-                <td>{{ $appointment->veterinarie->name . ' ' . $appointment->veterinarie->surname }}</td>
-                <td>{{ \Carbon\Carbon::parse($appointment->date_appointment)->format('Y/m/d') }}</td>
-                <td>
+                <td>{{$key+1}}</td>
+                <td> {{ $appointment->pet->name }} </td>
+                <td> {{ $appointment->pet->specie }} </td>
+                <td> {{ $appointment->veterinarie->name.' '.$appointment->veterinarie->surname }} </td>
+                <td> {{ Carbon\Carbon::parse($appointment->date_appointment)->format("Y/m/d") }} </td>
                     @php
-                        $states = [1 => 'Pendiente', 2 => 'Cancelado', 3 => 'Atendido'];
+                        $state_appointment = "";
+                        switch ($appointment->state) {
+                            case 1:
+                                $state_appointment = "Pendiente";
+                                break;
+                            case 2:
+                                $state_appointment = "Cancelado";
+                                break;
+                            case 3:
+                                $state_appointment = "Atendido";
+                                break;
+                            default:
+                                # code...
+                                break;
+                        }
                     @endphp
-                    {{ $states[$appointment->state] ?? 'Desconocido' }}
+                @if ($appointment->state == 1)
+                <td style="background: #fdf5b1">
+                    {{$state_appointment}}
                 </td>
-                <td>
+                @endif
+                @if ($appointment->state == 2)
+                <td style="background: #ffb6b6">
+                    {{$state_appointment}}
+                </td>
+                @endif
+                @if ($appointment->state == 3)
+                <td style="background: #d9ffb6">
+                    {{$state_appointment}}
+                </td>
+                @endif
                     @php
-                        $payments = [1 => 'Pendiente', 2 => 'Parcial', 3 => 'Completo'];
+                        $state_payment = "";
+                        switch ($appointment->state_pay) {
+                            case 1:
+                                $state_payment = "Pendiente";
+                                break;
+                            case 2:
+                                $state_payment = "Parcial";
+                                break;
+                            case 3:
+                                $state_payment = "Completo";
+                                break;
+                            default:
+                                # code...
+                                break;
+                        }
                     @endphp
-                    {{ $payments[$appointment->state_pay] ?? 'Desconocido' }}
+                @if ($appointment->state_pay == 1)
+                <td style="background: #f7a6a6">
+                    {{$state_payment}}
                 </td>
+                @endif
+                @if ($appointment->state_pay == 2)
+                <td style="background: #b6c8ff">
+                    {{$state_payment}}
+                </td>
+                @endif
+                @if ($appointment->state_pay == 3)
+                <td style="background: #e9b6ff">
+                    {{$state_payment}}
+                </td>
+                @endif
+
                 <td>
-                    @foreach ($appointment->schedules as $schedule)
-                        {{ \Carbon\Carbon::parse($schedule->schedule_hour->hour_start)->format('h:i A') }} -
-                        {{ \Carbon\Carbon::parse($schedule->schedule_hour->hour_end)->format('h:i A') }}<br>
-                    @endforeach
+                    <ul>
+                        @foreach ($appointment->schedules as $schedule)
+                            <li>
+                                {{Carbon\Carbon::parse(date("Y-m-d").' '.$schedule->schedule_hour->hour_start)->format("h:i A") .' '.Carbon\Carbon::parse(date("Y-m-d").' '.$schedule->schedule_hour->hour_end)->format("h:i A")}}
+                            </li>
+                        @endforeach
+                    </ul>
                 </td>
             </tr>
         @endforeach
+
     </tbody>
 </table>

@@ -21,11 +21,10 @@ const { isLeftSidebarOpen } = useResponsiveLeftSidebar()
 
 // 👉 useCalendar
 const { refCalendar, calendarOptions, addEvent, updateEvent, removeEvent, jumpToDate } = useCalendar(event, isEventHandlerSidebarActive, isLeftSidebarOpen)
-
 definePage({
-  meta: {
-    Permission: 'calendar'
-  }
+    meta: {
+        permisssion: 'calendar'
+    },
 })
 </script>
 <template>
@@ -34,13 +33,21 @@ definePage({
       <VLayout style="z-index: 0;">
         <VMain>
           <VCard flat>
-            <FullCalendar ref="refCalendar" :options="calendarOptions" />
+            <FullCalendar
+              ref="refCalendar"
+              :options="calendarOptions"
+            />
           </VCard>
         </VMain>
       </VLayout>
     </VCard>
-    <CalendarEventHandler v-model:isDrawerOpen="isEventHandlerSidebarActive" :event="event" @add-event="addEvent"
-      @update-event="updateEvent" @remove-event="removeEvent" />
+    <CalendarEventHandler
+      v-model:isDrawerOpen="isEventHandlerSidebarActive"
+      :event="event"
+      @add-event="addEvent"
+      @update-event="updateEvent"
+      @remove-event="removeEvent"
+    />
   </div>
 </template>
 <style lang="scss">
@@ -74,7 +81,7 @@ definePage({
     }
   }
 
-  &~.flatpickr-calendar .flatpickr-weekdays {
+  & ~ .flatpickr-calendar .flatpickr-weekdays {
     margin-block: 0 4px;
   }
 }

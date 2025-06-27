@@ -2,10 +2,10 @@
 
 namespace App\Models\Veterinarie;
 
-use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class VeterinarieScheduleDay extends Model
 {
@@ -14,13 +14,21 @@ class VeterinarieScheduleDay extends Model
         "veterinarie_id",
         "day"
     ];
-
-    public function veterinarie()
+    public function setCreatedAtAttribute($value)
     {
-        return $this->belongsTo(User::class, "veterinarie_id");
+    	date_default_timezone_set('America/Lima');
+        $this->attributes["created_at"]= Carbon::now();
     }
-    public function schedule_joins()
+
+    public function setUpdatedAtAttribute($value)
     {
-        return $this->hasMany(VeterinarieScheduleJoin::class, 'veterinarie_schedule_day_id');
+    	date_default_timezone_set("America/Lima");
+        $this->attributes["updated_at"]= Carbon::now();
+    }
+    public function veterinarie() {
+        return $this->belongsTo(User::class,"veterinarie_id");
+    }
+    public function schedule_joins() {
+        return $this->hasMany(VeterinarieScheduleJoin::class);
     }
 }
